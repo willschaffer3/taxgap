@@ -1,0 +1,4120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaxGap — Variable Comp Tax Estimator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f7f5;
+  --white: #ffffff;
+  --border: #e8e8e4;
+  --border-dark: #d0d0ca;
+  --text: #1a1a1a;
+  --text-2: #6b6b6b;
+  --text-3: #a0a09a;
+  --green: #00c805;
+  --green-bg: #f0fdf0;
+  --green-border: #bbf7bb;
+  --red: #e8332a;
+  --red-bg: #fff5f5;
+  --red-border: #fecaca;
+  --gold: #f5a623;
+  --gold-bg: #fffbf0;
+  --gold-border: #fde68a;
+  --accent: #1a1a1a;
+  --text-1: #1a1a1a;
+  --pill-bg: #f0f0ec;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 680px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ── HEADER ── */
+.header { padding: 56px 0 44px; text-align: center; }
+
+.logo {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--text-2); margin-bottom: 32px;
+  text-transform: uppercase;
+}
+.logo-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+
+h1 {
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.header-sub {
+  font-size: 16px;
+  color: var(--text-2);
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+
+.card-optional {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  background: var(--pill-bg);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.card-body { padding: 0 24px 24px; }
+
+/* ── FORM FIELDS ── */
+.field-group { display: grid; gap: 14px; }
+.field-group.cols-2 { grid-template-columns: 1fr 1fr; }
+.field-group.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tip {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--pill-bg); color: var(--text-3);
+  font-size: 10px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; position: relative;
+  transition: background 0.15s;
+}
+.tip:hover { background: var(--border-dark); color: var(--text-2); }
+.tip .tipbox {
+  position: fixed;
+  background: var(--text); color: #fff;
+  font-size: 11px; font-weight: 400;
+  padding: 10px 12px; border-radius: var(--radius-xs);
+  width: 240px; line-height: 1.5;
+  pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  z-index: 9999; white-space: normal; text-transform: none; letter-spacing: 0;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  box-shadow: var(--shadow-lg);
+  top: 0; left: 0; /* positioned by JS */
+}
+.tip .tipbox::after {
+  content: ''; position: absolute; top: 100%; left: var(--arrow-left, 50%);
+  transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--text);
+}
+.tip:hover .tipbox { opacity: 1; }
+
+.field-hint {
+  font-size: 11px; color: var(--text-3);
+  font-family: 'DM Mono', monospace; line-height: 1.4;
+}
+
+/* ── Pay stub visual guides ── */
+.wiz-find-it {
+  margin-top: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.wiz-find-it[open] {
+  border-color: #d4b896;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.wiz-find-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: #faf9f6;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  user-select: none;
+  transition: background 0.15s, color 0.15s;
+}
+.wiz-find-label::-webkit-details-marker { display: none; }
+.wiz-find-label::marker { display: none; }
+.wiz-find-label:hover { background: #f0ede6; color: var(--text); }
+.wiz-find-it[open] .wiz-find-label { background: #f5f1e8; color: var(--text); border-bottom: 1.5px solid #e8dfc8; }
+.wiz-find-label-chevron {
+  margin-left: auto;
+  font-size: 11px;
+  color: #b08040;
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.wiz-find-it[open] .wiz-find-label-chevron { transform: rotate(180deg); }
+.wiz-paystub {
+  background: #fff;
+  padding: 0;
+}
+.ps-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  background: #f5f5f2;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.ps-subheader {
+  font-size: 11px;
+  color: var(--text-2);
+  background: #fafaf8;
+  padding: 6px 14px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.ps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+}
+.ps-row:last-of-type { border-bottom: none; }
+.ps-key { color: var(--text-2); }
+.ps-val { color: var(--text-3); font-weight: 500; }
+.ps-dim { opacity: 0.45; }
+.ps-row.ps-highlight {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding-left: 11px;
+}
+.ps-row.ps-highlight .ps-key { color: var(--text); font-weight: 600; }
+.ps-arrow {
+  color: #b45309 !important;
+  font-weight: 700 !important;
+  font-size: 11px;
+}
+.ps-note {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.5;
+  padding: 8px 14px;
+  background: #f7f7f5;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Filing status picker (step 1) ── */
+.filing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+.filing-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 18px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+.filing-btn:hover { border-color: #c8b89a; background: #faf8f5; }
+.filing-btn.selected {
+  border-color: #d4a853;
+  background: #fffbeb;
+  box-shadow: 0 0 0 3px rgba(212,168,83,0.15);
+}
+.fb-icon { font-size: 24px; line-height: 1; }
+.fb-label { font-size: 13px; font-weight: 700; color: var(--text-1); }
+.fb-sub { font-size: 11px; color: var(--text-2); line-height: 1.4; }
+
+/* ── Spouse panel (step 1b) ── */
+.spouse-panel {
+  background: #fafaf8;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+.spouse-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 12px;
+}
+
+/* ── Commission frequency picker ── */
+.comm-freq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (max-width: 480px) {
+  .comm-freq-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.comm-freq-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+.comm-freq-btn:hover {
+  border-color: #c8b89a;
+  background: #faf8f5;
+}
+.comm-freq-btn.selected {
+  border-color: #d4a853;
+  background: #fffbeb;
+  box-shadow: 0 0 0 3px rgba(212,168,83,0.15);
+}
+.cfb-icon { font-size: 22px; line-height: 1; }
+.cfb-label { font-size: 13px; font-weight: 700; color: var(--text-1); }
+.cfb-sub { font-size: 11px; color: var(--text-2); }
+
+/* ── Breakout rows ── */
+.comm-breakout-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.comm-breakout-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+.comm-breakout-total {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #f5f1e8;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.comm-breakout-total strong {
+  font-family: 'DM Mono', monospace;
+  color: var(--text-1);
+  font-size: 15px;
+}
+.comm-next-year-note {
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: #f7f7f5;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  line-height: 1.5;
+}
+
+/* ── Insight callout box ── */
+.wiz-insight-box {
+  margin-top: 16px;
+  border-radius: 10px;
+  border: 1.5px solid #fde68a;
+  background: #fffbeb;
+  overflow: hidden;
+}
+.wib-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid #fde68a;
+}
+.wib-body { padding: 0; }
+.wib-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.wib-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  padding: 2px 7px;
+  height: fit-content;
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.wib-divider {
+  height: 1px;
+  background: #fde68a;
+  margin: 0 14px;
+}
+
+.input-wrap { position: relative; }
+.input-prefix {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  font-size: 14px; color: var(--text-3); pointer-events: none;
+  font-family: 'DM Mono', monospace;
+}
+
+input[type="number"], select {
+  width: 100%;
+  height: 46px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 0 13px 0 26px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus, select:focus {
+  border-color: var(--text);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(26,26,26,0.06);
+}
+select {
+  padding-left: 13px; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+}
+
+.field-divider {
+  height: 1px; background: var(--border);
+  margin: 8px 0 2px;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-3);
+  margin-bottom: 14px; margin-top: 4px;
+}
+
+/* ── CTA BUTTON ── */
+.cta-wrap { margin: 20px 0 40px; }
+.cta-btn {
+  width: 100%;
+  height: 54px;
+  background: var(--text);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: -0.01em;
+}
+.cta-btn:hover { opacity: 0.88; }
+.cta-btn:active { transform: scale(0.99); }
+.cta-note {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: var(--text-3);
+  font-family: 'DM Mono', monospace; line-height: 1.5;
+}
+
+/* ── RESULTS ── */
+#results {
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+#results.show { opacity: 1; transform: none; pointer-events: all; }
+
+/* Hero number card */
+.hero-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  padding: 48px 36px 36px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.hero-label {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+}
+.hero-amount {
+  font-size: clamp(52px, 12vw, 80px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 0;
+}
+.hero-amount.owe { color: var(--red); }
+.hero-amount.covered { color: var(--green); }
+.hero-breakout-pills {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 4px;
+  flex-wrap: wrap;
+}
+.bp-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f5f5f2;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 14px;
+  min-width: 90px;
+}
+.bp-pill-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.bp-pill-amt {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.02em;
+}
+.bp-pill-amt.red { color: var(--red); }
+.bp-pill-amt.green { color: var(--green); }
+.bp-pill-amt.neutral { color: var(--text-2); }
+.bp-sep {
+  font-size: 18px;
+  color: var(--border);
+  font-weight: 300;
+  line-height: 1;
+}
+.hero-sub {
+  font-size: 14px; color: var(--text-2); line-height: 1.55;
+  margin: 12px auto 20px; max-width: 400px;
+}
+.hero-action-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--text); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px; font-weight: 600;
+  padding: 12px 24px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.hero-action-btn:hover { opacity: 0.82; }
+.hero-covered-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid var(--green-border);
+  border-radius: 20px; padding: 9px 20px;
+  font-size: 14px; font-weight: 600;
+}
+
+/* Results summary card ("The short version") */
+.results-summary-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 22px 24px;
+  margin-bottom: 12px;
+}
+.rsc-title {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.rsc-body {
+  font-size: 15px; color: var(--text); line-height: 1.65;
+}
+.rsc-body strong { font-weight: 700; }
+.rsc-red { color: var(--red); font-weight: 600; }
+.rsc-green { color: #16a34a; font-weight: 600; }
+
+/* Stats row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 18px 16px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.stat-value { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; margin-bottom: 3px; }
+.stat-value.red { color: var(--red); }
+.stat-value.green { color: var(--green); }
+.stat-value.gold { color: var(--gold); }
+.stat-sub { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; line-height: 1.4; }
+
+/* Breakdown */
+.breakdown-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  overflow: hidden; margin-bottom: 16px;
+}
+.breakdown-toggle {
+  width: 100%; background: none; border: none;
+  padding: 18px 24px; text-align: left; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--text);
+  transition: background 0.1s;
+}
+.breakdown-toggle:hover { background: var(--bg); }
+.toggle-chevron { transition: transform 0.2s; font-size: 12px; color: var(--text-3); }
+.breakdown-toggle.open .toggle-chevron { transform: rotate(180deg); }
+.breakdown-body { display: none; padding: 0 24px 20px; }
+.breakdown-body.open { display: block; }
+
+.breakdown-section { margin-bottom: 16px; }
+.breakdown-section-label {
+  font-size: 10px; font-weight: 600; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 8px; margin-top: 4px;
+}
+.brow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.brow:last-child { border-bottom: none; }
+.brow-label { color: var(--text-2); }
+.brow-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+.brow-value.red { color: var(--red); }
+.brow-value.green { color: var(--green); }
+.brow-value.muted { color: var(--text-3); }
+.brow.total { margin-top: 4px; }
+.brow.total .brow-label { font-weight: 700; color: var(--text); }
+.brow.total .brow-value { font-weight: 700; font-size: 14px; }
+
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px; margin-left: 6px;
+  font-family: 'Bricolage Grotesque', sans-serif; letter-spacing: 0;
+  vertical-align: middle;
+}
+.badge.projected { background: #eff6ff; color: #3b82f6; }
+.badge.owe { background: var(--red-bg); color: var(--red); }
+.badge.refund { background: var(--green-bg); color: var(--green); }
+
+/* Quarterly tracker */
+.quarters-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  padding: 20px 24px; margin-bottom: 16px;
+}
+.quarters-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 14px; }
+.q-cell {
+  border-radius: var(--radius-sm); padding: 12px 10px 10px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  text-align: center;
+}
+.q-cell.paid { background: var(--green-bg); border-color: var(--green-border); }
+.q-cell.next-up { background: var(--gold-bg); border-color: var(--gold-border); }
+.q-cell.past-missed { opacity: 0.45; }
+.q-name { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.q-name.paid { color: var(--green); }
+.q-name.next-up { color: var(--gold); }
+.q-amount { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.q-date { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-top: 3px; }
+.q-status { font-size: 10px; font-weight: 600; margin-top: 4px; }
+.q-status.paid { color: var(--green); }
+.q-status.next-up { color: var(--gold); }
+
+/* 401k card */
+.k401-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  padding: 24px; margin-bottom: 16px;
+}
+.k401-bar-wrap { margin: 14px 0 6px; }
+.k401-bar-track {
+  height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+}
+.k401-bar-fill {
+  height: 100%; background: var(--green); border-radius: 3px;
+  transition: width 0.6s ease; width: 0;
+}
+.k401-bar-labels {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace;
+  margin-top: 5px;
+}
+.k401-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+.k401-stat { text-align: center; }
+.k401-stat-val { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.k401-stat-val.green { color: var(--green); }
+.k401-stat-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 3px; }
+.k401-insight {
+  margin-top: 14px; padding: 12px 14px;
+  background: var(--bg); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-2); line-height: 1.55;
+}
+
+/* W-4 Recommendation */
+.w4-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  overflow: hidden; margin-bottom: 16px;
+}
+.w4-rec-banner {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.w4-rec-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.w4-rec-text { font-size: 14px; line-height: 1.55; color: var(--text); }
+.w4-rec-text strong { font-weight: 700; }
+
+/* Provider tabs */
+.provider-tabs {
+  display: flex; overflow-x: auto; border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.provider-tabs::-webkit-scrollbar { display: none; }
+.ptab {
+  flex-shrink: 0; padding: 12px 18px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; cursor: pointer;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  transition: color 0.15s; white-space: nowrap;
+}
+.ptab:hover { color: var(--text); }
+.ptab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+
+.provider-content { display: none; padding: 20px 24px; }
+.provider-content.active { display: block; }
+
+.step-list { display: flex; flex-direction: column; gap: 0; }
+.step { display: grid; grid-template-columns: 28px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.step:last-child { border-bottom: none; }
+.step-n {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--text-2);
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.step-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.step-desc code {
+  font-family: 'DM Mono', monospace; background: var(--bg);
+  border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px;
+  font-size: 11px; color: var(--text);
+}
+
+/* Mockup */
+.mockup {
+  margin: 10px 0; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden; background: var(--bg);
+}
+.mockup-topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 7px 12px; display: flex; align-items: center; gap: 5px;
+}
+.mdot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-dark); }
+.murl { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-left: 6px; }
+.mockup-body { padding: 14px; }
+.mock-nav { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+.mnav-item { font-size: 11px; padding: 6px 12px; color: var(--text-3); border-bottom: 2px solid transparent; }
+.mnav-item.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+.mock-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-xs); margin-bottom: 5px;
+  background: var(--white); font-size: 11px;
+}
+.mock-row.hl { border-color: var(--text); background: #f7f7f5; }
+.mock-row-lbl { color: var(--text-2); }
+.mock-row-val { font-family: 'DM Mono', monospace; font-weight: 500; }
+.mock-btn {
+  display: inline-block; background: var(--text); color: #fff;
+  font-size: 11px; font-weight: 600; padding: 6px 14px;
+  border-radius: 6px; margin-top: 8px; font-family: 'Bricolage Grotesque', sans-serif;
+}
+.callout-arrow { display: flex; gap: 7px; align-items: flex-start; margin-top: 7px; }
+.arrow-sym { color: var(--gold); font-size: 13px; }
+.arrow-txt { font-size: 11px; color: var(--text-2); font-family: 'DM Mono', monospace; line-height: 1.4; }
+
+/* EFTPS */
+.eftps-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  padding: 24px 24px; margin-bottom: 12px;
+}
+.eftps-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 14px; }
+.eftps-step {
+  background: var(--bg); border-radius: var(--radius-sm);
+  padding: 14px; border: 1px solid var(--border);
+}
+.eftps-n { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.eftps-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.eftps-body { font-size: 11px; color: var(--text-2); line-height: 1.55; font-family: 'DM Mono', monospace; }
+.ext-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 10px; font-size: 11px; font-weight: 600;
+  color: var(--text); background: var(--white);
+  border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+  padding: 5px 10px; text-decoration: none;
+  transition: border-color 0.15s;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+.ext-btn:hover { border-color: var(--text-2); }
+
+/* Deadlines */
+.deadlines-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+  padding: 16px 24px; margin-bottom: 32px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.dl-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+.dl-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.dl-pill {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--pill-bg); color: var(--text-2);
+  font-family: 'DM Mono', monospace;
+}
+.dl-pill.next { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); font-weight: 700; }
+.dl-pill.passed { opacity: 0.35; }
+
+/* Section header in results */
+.results-section-header {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 32px 0 10px;
+}
+
+@media (max-width: 560px) {
+  .field-group.cols-2, .field-group.cols-3 { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr !important; }
+  .ap-item { grid-template-columns: 28px 1fr; }
+  .ap-amount { display: none; }
+  .quarters-grid { grid-template-columns: 1fr 1fr; }
+  .eftps-steps { grid-template-columns: 1fr; }
+  .k401-stats { grid-template-columns: 1fr 1fr; }
+  .hero-amount { font-size: 52px; }
+}
+
+  /* Action Plan */
+  .action-plan-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    overflow: hidden; margin-bottom: 12px;
+  }
+  .ap-header {
+    padding: 20px 24px 18px; border-bottom: 1px solid var(--border);
+    background: var(--text); color: #fff;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .ap-header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .ap-header-sub { font-size: 13px; opacity: 0.65; line-height: 1.5; }
+  .ap-body { padding: 8px 0; }
+  .ap-item {
+    display: grid; grid-template-columns: 40px 1fr auto;
+    gap: 14px; padding: 16px 24px; border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .ap-item:last-child { border-bottom: none; }
+  .ap-priority {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .ap-priority.urgent { background: #fee2e2; color: var(--red); }
+  .ap-priority.important { background: #fef3c7; color: var(--gold); }
+  .ap-priority.optimize { background: #d1fae5; color: #059669; }
+  .ap-priority.info { background: var(--pill-bg); color: var(--text-3); }
+  .ap-content-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .ap-content-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+  .ap-content-desc strong { color: var(--text); font-weight: 700; }
+  .ap-amount {
+    font-size: 15px; font-weight: 700; letter-spacing: -0.02em;
+    white-space: nowrap; padding-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+  .ap-amount.red { color: var(--red); }
+  .ap-amount.green { color: var(--green); }
+  .ap-amount.gold { color: var(--gold); }
+  .ap-amount.muted { color: var(--text-3); font-size:13px; }
+  .ap-deadline { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .ap-group-label {
+    padding: 8px 24px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+  .ap-group:first-child .ap-group-label { border-top: none; }
+  .ap-tag {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--pill-bg); color: var(--text-3);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    letter-spacing: 0; text-transform: none;
+    vertical-align: middle; margin-left: 6px;
+  }
+  .ap-priority[data-icon="4a"] { font-size: 9px; }
+
+  /* Capital gains stat */
+  .cg-stat { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 10px; }
+
+
+
+  /* ── RECOMMENDATION CARD ── */
+  .rec-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .rec-placeholder {
+    padding: 24px;
+    font-size: 14px;
+    color: var(--text-3);
+  }
+  .rec-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rec-header-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .rec-header-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+  .rec-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .rec-option {
+    padding: 20px 22px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .rec-option:last-child { border-right: none; }
+  .rec-option.rec-best {
+    background: #f8fffe;
+  }
+  .rec-opt-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .rec-opt-badge.best { background: #d1fae5; color: #065f46; }
+  .rec-opt-badge.alt  { background: var(--pill-bg); color: var(--text-3); }
+  .rec-opt-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .rec-opt-number {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .rec-opt-number.green { color: #16a34a; }
+  .rec-opt-sub {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+  .rec-opt-sub strong { color: var(--text); }
+  .rec-opt-action {
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .rec-opt-action span { color: var(--text); }
+
+  /* ── Slider option inside rec card ── */
+  .rec-slider-wrap {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .rec-slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-2);
+    margin-bottom: 8px;
+  }
+  .rec-slider-label strong {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-1);
+  }
+  .rec-slider {
+    width: 100%;
+    height: 4px;
+    accent-color: #d4a853;
+    cursor: pointer;
+  }
+  .rec-slider-endpoints {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  .rec-spillover {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-2);
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.5;
+  }
+  .rec-spillover strong { color: var(--text-1); }
+  .rec-spillover.hidden { display: none; }
+
+  /* Deductions section */
+  .rec-deductions {
+    padding: 18px 24px;
+  }
+  .rec-ded-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 14px;
+  }
+  .rec-ded-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .rec-ded-item {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .rec-ded-item.active { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .rec-ded-item.inactive { opacity: 0.5; }
+  .rec-ded-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .rec-ded-desc { font-size: 11px; color: var(--text-3); line-height: 1.4; }
+  .rec-ded-val {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+    color: #16a34a;
+    flex-shrink: 0;
+  }
+  .rec-ded-val.miss { color: var(--text-3); }
+
+  @media (max-width: 700px) {
+    .rec-options { grid-template-columns: 1fr; }
+    .rec-option { border-right: none; border-bottom: 1px solid var(--border); }
+    .rec-ded-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── WIZARD ── */
+  #wizard {
+    max-width: 620px;
+    margin: 0 auto 40px;
+  }
+
+  .wiz-progress {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .wiz-progress-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 12.5%;
+  }
+  .wiz-step-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 28px;
+  }
+
+  /* Sliding track */
+  .wiz-track {
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+  }
+
+  .wiz-step {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    opacity: 0;
+    transform: translateX(60px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .wiz-step.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+    position: relative;
+  }
+  .wiz-step.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    pointer-events: none;
+  }
+
+  .wiz-q {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .wiz-hint {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .wiz-badge-opt {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--pill-bg);
+    color: var(--text-3);
+    margin-bottom: 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* Big single input */
+  .wiz-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 0 18px;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  .wiz-input-wrap:focus-within {
+    border-color: var(--text);
+  }
+  .wiz-prefix {
+    font-size: 22px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .wiz-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 32px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    padding: 18px 0;
+    background: transparent;
+    width: 100%;
+  }
+  .wiz-input::placeholder { color: var(--border); }
+  .wiz-input-sm {
+    font-size: 20px;
+    padding: 12px 0;
+  }
+
+  .wiz-sub-label {
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 24px;
+  }
+
+  /* Multi-field row */
+  .wiz-field-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .wiz-field {
+    flex: 1;
+    min-width: 140px;
+  }
+  .wiz-field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .wiz-select {
+    width: 100%;
+    padding: 11px 40px 11px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    text-overflow: ellipsis;
+  }
+  .wiz-select:focus { outline: none; border-color: var(--text); }
+  .wiz-select.unselected { color: var(--text-3); }
+  .wiz-select option { color: var(--text); }
+
+  .wiz-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+  }
+
+  /* Action buttons */
+  .wiz-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .wiz-next {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .wiz-next:hover { opacity: 0.85; }
+  .wiz-next:active { transform: scale(0.98); }
+  .wiz-next.primary {
+    background: #16a34a;
+    font-size: 16px;
+    padding: 15px 32px;
+  }
+  .wiz-enter {
+    font-size: 13px;
+    opacity: 0.55;
+    font-family: 'DM Mono', monospace;
+  }
+  .wiz-back {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: var(--text-3);
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .wiz-back:hover { color: var(--text); }
+
+  /* Completed step summary chips (shown above active step) */
+  .wiz-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .wiz-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--pill-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .wiz-chip:hover { background: #e8e8e4; }
+  .wiz-chip-label { font-weight: 600; color: var(--text-3); }
+  .wiz-chip-val { font-family: 'DM Mono', monospace; font-size: 11px; }
+  .wiz-chip-edit { font-size: 10px; color: var(--text-3); opacity: 0.7; }
+
+  @media (max-width: 560px) {
+    .wiz-q { font-size: 20px; }
+    .wiz-input { font-size: 26px; }
+    .wiz-field-row { flex-direction: column; gap: 10px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo"><span class="logo-dot"></span> TaxGap</div>
+    <h1>Know exactly what you owe — before April does.</h1>
+    <p class="header-sub">Built for commission earners whose April tax bills are always a surprise. Enter your numbers once, get a clear action plan.</p>
+  </div>
+
+  <!-- WIZARD INPUTS -->
+  <div id="wizard">
+
+    <!-- PROGRESS BAR -->
+    <div class="wiz-progress">
+      <div class="wiz-progress-fill" id="wiz-progress-fill"></div>
+    </div>
+    <div class="wiz-step-label" id="wiz-step-label">Step 1 of 8</div>
+
+    <!-- STEP CONTAINER -->
+    <div class="wiz-track" id="wiz-track">
+
+      <!-- STEP 1: Filing status + profile -->
+      <div class="wiz-step" data-step="1">
+
+        <!-- 1A: Filing status tile picker -->
+        <div id="step1a" class="step1-panel">
+          <div class="wiz-q">How are you filing this year?</div>
+          <div class="wiz-hint">This determines which tax brackets apply and whether we factor in a spouse's income.</div>
+          <div class="filing-grid">
+            <button class="filing-btn" data-filing="single" onclick="selectFiling('single')">
+              <span class="fb-icon">👤</span>
+              <span class="fb-label">Just me</span>
+              <span class="fb-sub">Single or MFS</span>
+            </button>
+            <button class="filing-btn" data-filing="mfj" onclick="selectFiling('mfj')">
+              <span class="fb-icon">👫</span>
+              <span class="fb-label">Married, filing jointly</span>
+              <span class="fb-sub">One return together</span>
+            </button>
+            <button class="filing-btn" data-filing="hoh" onclick="selectFiling('hoh')">
+              <span class="fb-icon">🏠</span>
+              <span class="fb-label">Head of household</span>
+              <span class="fb-sub">Single with dependents</span>
+            </button>
+          </div>
+          <!-- hidden input keeps existing calc logic working -->
+          <input type="hidden" id="filing" value="">
+        </div>
+
+        <!-- Shared base salary field — always present, shown after filing is selected -->
+        <div id="step1-salary" style="display:none; margin-top:20px">
+          <div class="wiz-field-label">Your base salary</div>
+          <div class="wiz-input-wrap" style="margin-top:6px"><span class="wiz-prefix">$</span>
+            <input class="wiz-input" type="text" id="base" placeholder="120,000" min="0" inputmode="numeric">
+          </div>
+          <div class="ps-note" style="margin-top:6px;border:none;background:none;padding:4px 0">Your fixed yearly pay — not counting commissions or bonuses</div>
+        </div>
+
+        <!-- 1B: MFJ spouse panel — shown below salary for MFJ -->
+        <div id="step1b" class="step1-panel" style="display:none; margin-top:16px">
+          <div class="wiz-q" style="font-size:18px;margin-top:8px">And your spouse?</div>
+          <div class="wiz-hint">We'll fold their income into your joint bracket. Rough numbers are fine.</div>
+
+          <div class="wiz-field-row" style="margin-top:12px">
+            <div class="wiz-field" style="flex:2">
+              <div class="wiz-field-label">Spouse's total income (approx.)</div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="spouseIncome" placeholder="0" min="0" inputmode="numeric">
+              </div>
+              <div class="ps-note" style="margin-top:6px;border:none;background:none;padding:4px 0">Salary + any other income. Estimate is fine.</div>
+            </div>
+          </div>
+
+          <div class="wiz-field" style="margin-top:14px">
+            <div class="wiz-field-label">Does your spouse have taxes withheld from their paychecks?</div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="filing-btn" id="spouse-withheld-yes" onclick="setSpouseWithheld(true)" style="flex:1;padding:12px">
+                <span class="fb-label">Yes</span>
+              </button>
+              <button class="filing-btn" id="spouse-withheld-no" onclick="setSpouseWithheld(false)" style="flex:1;padding:12px">
+                <span class="fb-label">No or not sure</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="spouse-withheld-row" style="display:none;margin-top:12px">
+            <div class="wiz-field-label">Spouse's federal tax withheld YTD (approx.)</div>
+            <div class="wiz-input-wrap" style="margin-top:6px"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="spouseWithheld" placeholder="0" min="0" inputmode="numeric">
+            </div>
+            <div class="ps-note" style="margin-top:6px;border:none;background:none;padding:4px 0">From their most recent pay stub — "Federal Income Tax YTD"</div>
+          </div>
+        </div>
+
+        <!-- Actions — shown after filing is selected -->
+        <div id="step1a-actions" style="display:none; margin-top:20px">
+          <div class="wiz-actions">
+            <button class="wiz-back" onclick="step1GoBack()">← Back</button>
+            <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: Pay frequency + state -->
+      <div class="wiz-step" data-step="2">
+        <div class="wiz-q">Where are you located and how often do you get paid?</div>
+        <div class="wiz-hint">State determines your tax rate. Pay frequency determines how many paychecks we have left to spread any withholding adjustment across.</div>
+        <div class="wiz-field-row">
+          <div class="wiz-field">
+            <div class="wiz-field-label">How often do you get paid?</div>
+            <select class="wiz-select" id="payFreq">
+              <option value="" disabled selected hidden>Select...</option>
+              <option value="26">Every 2 weeks (biweekly)</option>
+              <option value="24">Twice a month (1st &amp; 15th)</option>
+              <option value="12">Once a month</option>
+              <option value="52">Every week</option>
+            </select>
+            <div class="ps-note" style="margin-top:6px;border:none;background:none;padding:4px 0">💡 If paychecks are always 14 days apart, pick "every 2 weeks"</div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">What state do you live in?</div>
+            <select class="wiz-select" id="state">
+              <option value="" disabled selected hidden>Select...</option>
+              <option value="none">No state income tax (TX, FL, WA…)</option>
+              <option value="ca">California</option>
+              <option value="ny">New York State</option>
+              <option value="nyc">New York + NYC</option>
+              <option value="nj">New Jersey</option>
+              <option value="il">Illinois</option>
+              <option value="tx">Texas</option>
+              <option value="fl">Florida</option>
+              <option value="wa">Washington</option>
+              <option value="ma">Massachusetts</option>
+              <option value="co">Colorado</option>
+              <option value="ga">Georgia</option>
+              <option value="nc">North Carolina</option>
+              <option value="va">Virginia</option>
+              <option value="pa">Pennsylvania</option>
+              <option value="oh">Ohio</option>
+              <option value="mi">Michigan</option>
+              <option value="az">Arizona</option>
+              <option value="mn">Minnesota</option>
+              <option value="or">Oregon</option>
+            </select>
+          </div>
+        </div>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Commissions YTD -->
+      <div class="wiz-step" data-step="3">
+        <div class="wiz-q">How much commission or bonus have you received so far this year?</div>
+        <div class="wiz-hint">Add up every commission, bonus, or variable payout you've actually been paid since January 1st. This is the money that often gets under-withheld.</div>
+        <div class="wiz-input-wrap"><span class="wiz-prefix">$</span>
+          <input class="wiz-input" type="text" id="commYTD" placeholder="0" min="0" inputmode="numeric">
+        </div>
+        <details class="wiz-find-it">
+          <summary class="wiz-find-label">📄 Where to find it — your pay stub YTD column<span class="wiz-find-label-chevron">▼</span></summary>
+          <div class="wiz-paystub">
+            <div class="ps-header">Pay Stub — Year-to-Date Earnings</div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">Regular / Base Pay — YTD</span>
+              <span class="ps-val">don't include</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Commission — YTD</span>
+              <span class="ps-val ps-arrow">← add these up</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Bonus — YTD</span>
+              <span class="ps-val ps-arrow">← include bonuses too</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Supplemental Pay — YTD</span>
+              <span class="ps-val ps-arrow">← and any other variable pay</span>
+            </div>
+            <div class="ps-note">💡 In Workday: <strong>Pay → Pay History → any recent payslip → Earnings section → YTD column</strong></div>
+          </div>
+        </details>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Remaining commissions — 2-part branch -->
+      <div class="wiz-step" data-step="4">
+
+        <!-- 4A: How often do you get commission checks? -->
+        <div id="step4a" class="step4-panel">
+          <div class="wiz-q">How often do you receive commission or bonus checks?</div>
+          <div class="wiz-hint">This helps us figure out how many more checks are coming before year-end.</div>
+          <div class="comm-freq-grid">
+            <button class="comm-freq-btn" data-freq="monthly" onclick="selectCommFreq('monthly')">
+              <span class="cfb-icon">📅</span>
+              <span class="cfb-label">Monthly</span>
+              <span class="cfb-sub">12× per year</span>
+            </button>
+            <button class="comm-freq-btn" data-freq="quarterly" onclick="selectCommFreq('quarterly')">
+              <span class="cfb-icon">📆</span>
+              <span class="cfb-label">Quarterly</span>
+              <span class="cfb-sub">4× per year</span>
+            </button>
+            <button class="comm-freq-btn" data-freq="semiannual" onclick="selectCommFreq('semiannual')">
+              <span class="cfb-icon">🗓️</span>
+              <span class="cfb-label">Semi-annual</span>
+              <span class="cfb-sub">2× per year</span>
+            </button>
+            <button class="comm-freq-btn" data-freq="annual" onclick="selectCommFreq('annual')">
+              <span class="cfb-icon">📋</span>
+              <span class="cfb-label">Annual</span>
+              <span class="cfb-sub">1× per year</span>
+            </button>
+            <button class="comm-freq-btn" data-freq="irregular" onclick="selectCommFreq('irregular')">
+              <span class="cfb-icon">⚡</span>
+              <span class="cfb-label">Irregular</span>
+              <span class="cfb-sub">Deal-by-deal</span>
+            </button>
+          </div>
+          <div class="wiz-actions" style="margin-top:20px">
+            <button class="wiz-back" onclick="wizBack()">← Back</button>
+          </div>
+        </div>
+
+        <!-- 4B: Breakout based on frequency selection -->
+        <div id="step4b" class="step4-panel" style="display:none">
+          <div class="wiz-q" id="step4b-q">What are you expecting for the rest of the year?</div>
+          <div class="wiz-hint" id="step4b-hint">Your best guess is fine — recalculate when the next check hits.</div>
+
+          <!-- Dynamic breakout rows injected here -->
+          <div id="step4b-rows"></div>
+
+          <!-- Hidden total field — always computed from breakout rows -->
+          <input type="hidden" id="commRemaining" value="0">
+
+          <div class="wiz-field" style="margin-top:16px">
+            <div class="wiz-field-label">Federal withholding rate on commission checks
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Check a recent commission stub: Federal Income Tax ÷ Gross Commission. Most companies use 22% (IRS flat rate) — but if you're in the 35–37% bracket, your actual rate owed is much higher.</span></span>
+            </div>
+            <select class="wiz-select" id="commRate" style="max-width:280px">
+              <option value="" disabled selected hidden>Select...</option>
+              <option value="0.22">22% — IRS flat rate (most companies)</option>
+              <option value="0.37">37% — aggregate method</option>
+              <option value="0.28">28%</option>
+              <option value="0.30">30%</option>
+            </select>
+          </div>
+
+          <div class="wiz-insight-box" style="margin-top:16px">
+            <div class="wib-title">⚡ Why commission checks cause tax surprises</div>
+            <div class="wib-body">
+              <div class="wib-row">
+                <span class="wib-label">Federal</span>
+                <span class="wib-val">IRS withholds a flat <strong>22%</strong> on every commission check. If you're in the 37% bracket, that's a <strong>$15 shortfall on every $100</strong>.</span>
+              </div>
+              <div class="wib-divider"></div>
+              <div class="wib-row">
+                <span class="wib-label">State</span>
+                <span class="wib-val">States treat each commission as your <em>entire annual salary</em>, over-withhold at the top rate, then you get a refund. Big checks, big state over-withholding.</span>
+              </div>
+            </div>
+          </div>
+
+          <details class="wiz-find-it" style="margin-top:12px">
+            <summary class="wiz-find-label">📄 How to find your federal rate on a commission stub<span class="wiz-find-label-chevron">▼</span></summary>
+            <div class="wiz-paystub">
+              <div class="ps-header">Commission Pay Stub — Current Period</div>
+              <div class="ps-row ps-highlight"><span class="ps-key">Gross Commission</span><span class="ps-val">$82,872</span></div>
+              <div class="ps-row ps-highlight"><span class="ps-key">Federal Income Tax Withheld</span><span class="ps-val">$17,320</span></div>
+              <div class="ps-row ps-dim"><span class="ps-key">Rate = $17,320 ÷ $82,872</span><span class="ps-val">= 20.9% → pick 22%</span></div>
+              <div class="ps-note">💡 The state number will be high — aggregate method. Federal will be low for high earners. That's the gap this calculator fixes.</div>
+            </div>
+          </details>
+
+          <div class="wiz-actions">
+            <button class="wiz-back" onclick="step4GoBack()">← Back</button>
+            <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: Withholding YTD -->
+      <div class="wiz-step" data-step="5">
+        <div class="wiz-q" id="step5-q">How much tax has already been taken out of your paychecks this year?</div>
+        <div class="wiz-hint">This is money your employer already sent to the IRS and your state on your behalf. Use the <strong>YTD column</strong> on your latest pay stub — not the current paycheck amount.</div>
+        <div class="wiz-field-row">
+          <div class="wiz-field">
+            <div class="wiz-field-label">Federal income tax withheld so far this year</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="fedWithheld" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">State income tax withheld so far this year</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="stateWithheld" placeholder="0" min="0" inputmode="numeric">
+            </div>
+            <div class="ps-note" style="border:none;background:none;padding:4px 0;margin-top:4px">NYC residents: add state + city withholding together</div>
+          </div>
+        </div>
+        <details class="wiz-find-it">
+          <summary class="wiz-find-label">📄 What to include and what to skip on your pay stub<span class="wiz-find-label-chevron">▼</span></summary>
+          <div class="wiz-paystub">
+            <div class="ps-header">Pay Stub — Taxes &amp; Deductions (YTD column)</div>
+            <div class="ps-subheader">Only add up lines that say <strong>Income Tax</strong> or <strong>Withholding</strong> — skip insurance premiums and payroll deductions</div>
+
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Federal Income Tax — YTD</span>
+              <span class="ps-val ps-arrow">← Federal field</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">State Income Tax — YTD <em style="font-weight:400">(e.g. NY Income Tax)</em></span>
+              <span class="ps-val ps-arrow">← State field</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">City Withholding — YTD <em style="font-weight:400">(e.g. NY CIW, NYC Tax)</em></span>
+              <span class="ps-val ps-arrow">← add to State field</span>
+            </div>
+
+            <div class="ps-row ps-dim">
+              <span class="ps-key">Social Security / OASDI — YTD</span>
+              <span class="ps-val">❌ skip</span>
+            </div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">Medicare — YTD</span>
+              <span class="ps-val">❌ skip</span>
+            </div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">NY Paid FMLA / NY PFL — YTD</span>
+              <span class="ps-val">❌ skip — insurance premium, not tax</span>
+            </div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">CA SDI / NJ SDI / WA Cares — YTD</span>
+              <span class="ps-val">❌ skip — disability insurance, not tax</span>
+            </div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">NJ FLI / WA PFML — YTD</span>
+              <span class="ps-val">❌ skip — family leave insurance, not tax</span>
+            </div>
+
+            <div class="ps-note">💡 <strong>Workday:</strong> Pay → Pay History → latest payslip → Taxes section → YTD column<br>💡 <strong>ADP:</strong> Myself → Pay → Pay Statements → most recent → Tax details<br>💡 <strong>Rule of thumb:</strong> if the line has "tax," "withholding," or your state's abbreviation + "IT" — include it. If it has "SDI," "FMLA," "PFL," "SUI," "FLI," or "Cares" — skip it.</div>
+          </div>
+        </details>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 6: 401k + W-4 current setup -->
+      <div class="wiz-step" data-step="6">
+        <div class="wiz-q">Any 401(k) contributions or extra withholding already set up?</div>
+        <div class="wiz-badge-opt">Optional — skip if you're not sure</div>
+        <div class="wiz-field-row" style="margin-top:20px">
+          <div class="wiz-field">
+            <div class="wiz-field-label">How much have you put into your 401(k) this year?</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="k401ytd" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">How much total will you contribute by end of year?</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="k401total" placeholder="0" min="0" inputmode="numeric">
+            </div>
+            <div class="ps-note" style="border:none;background:none;padding:4px 0;margin-top:4px">2025 max: $23,500 ($31,000 if age 50+)</div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">What type of 401(k)?</div>
+            <select class="wiz-select" id="k401type" onchange="on401kTypeChange()">
+              <option value="" disabled selected hidden>Select...</option>
+              <option value="traditional">Traditional — reduces your taxes now</option>
+              <option value="roth">Roth — no tax break now, grows tax-free</option>
+              <option value="mixed">Mix of both</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Mixed split — shown only when "mixed" is selected -->
+        <div id="k401-mixed-row" style="display:none; margin-top:14px">
+          <div class="wiz-field-label" style="margin-bottom:8px">
+            Of your total contributions, how much is <strong>Traditional</strong>?
+            <span class="tip" style="display:inline-flex">?<span class="tipbox">Only your Traditional (pre-tax) contributions reduce your taxable income this year. Roth contributions don't. Split your total between the two so we get the deduction right.</span></span>
+          </div>
+          <div class="wiz-field-row">
+            <div class="wiz-field">
+              <div class="wiz-field-label">Traditional (pre-tax)</div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="k401traditional" placeholder="0" min="0" inputmode="numeric" oninput="on401kSplitInput()">
+              </div>
+            </div>
+            <div class="wiz-field">
+              <div class="wiz-field-label">Roth (after-tax)</div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="k401roth" placeholder="0" min="0" inputmode="numeric" oninput="on401kSplitInput()">
+              </div>
+            </div>
+            <div class="wiz-field" style="flex:0.8">
+              <div class="wiz-field-label">Total</div>
+              <div id="k401-split-total" style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-top:6px;font-family:'DM Mono',monospace">$0</div>
+              <div id="k401-split-note" style="font-size:11px;color:var(--text-3);margin-top:4px;font-family:'DM Mono',monospace"></div>
+            </div>
+          </div>
+        </div>
+        <details class="wiz-find-it">
+          <summary class="wiz-find-label">📄 Where to find your 401(k) contributions<span class="wiz-find-label-chevron">▼</span></summary>
+          <div class="wiz-paystub">
+            <div class="ps-header">Pay Stub — Pre-Tax Deductions (YTD column)</div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">401(k) Pre-Tax (Traditional) — YTD</span>
+              <span class="ps-val ps-arrow">← counts toward "so far"</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Roth 401(k) — YTD <em style="font-weight:400">(if you have it)</em></span>
+              <span class="ps-val ps-arrow">← also counts toward "so far"</span>
+            </div>
+            <div class="ps-row ps-dim">
+              <span class="ps-key">401(k) Employer Match — YTD</span>
+              <span class="ps-val">❌ don't include employer match</span>
+            </div>
+            <div class="ps-note">💡 Your 401(k) portal (Fidelity, Vanguard, Schwab) shows the split under <strong>Account Activity → Contributions</strong> — look for "Pre-Tax" vs "Roth" rows</div>
+          </div>
+        </details>
+        <div class="wiz-divider"></div>
+        <div class="wiz-field-label" style="font-size:14px;font-weight:600;margin-bottom:4px">Do you have any extra withholding set up? <span style="font-weight:400;color:var(--text-3)">(most people don't)</span></div>
+        <div class="wiz-field-row">
+          <div class="wiz-field">
+            <div class="wiz-field-label">Extra $ withheld every paycheck (W-4 line 4c)
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">An optional extra amount you can ask your employer to withhold. Most people have $0 here. Check your payroll portal under "Tax Withholding" or "W-4 Settings".</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="currentExtra4c" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Other income declared on W-4 line 4a
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">An advanced W-4 setting where you declare side income so your employer withholds extra. Most people have $0. Leave blank if you haven't set this up.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="current4a" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 7: Outside income -->
+      <div class="wiz-step" data-step="7">
+        <div class="wiz-q">Do you earn money outside your regular job?</div>
+        <div class="wiz-badge-opt">Optional — skip if none applies</div>
+        <div class="wiz-hint" style="margin-top:8px">Side hustles, rental properties, freelance work — none of this gets taxes withheld automatically, so it often leads to surprise bills.</div>
+        <div class="wiz-field-row" style="margin-top:20px">
+          <div class="wiz-field">
+            <div class="wiz-field-label">Freelance / consulting / gig work income
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Any money on a 1099 form — Uber, DoorDash, freelance projects, consulting. No taxes are withheld from these, so we'll calculate what you owe.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="freelanceIncome" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Rental income (profit after expenses)
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">What's left after paying mortgage interest, property tax, repairs, and depreciation. If your rental runs at a loss, enter $0.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="rentalIncome" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Interest and dividends from investments
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Money from savings accounts, CDs, or stock dividends. Found on your 1099-INT and 1099-DIV forms, or your brokerage's tax documents section.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="interestDiv" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <div class="wiz-field-row">
+          <div class="wiz-field">
+            <div class="wiz-field-label">Any other income not from a job
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Crypto staking rewards, gambling winnings, prizes, alimony received (pre-2019). If in doubt, enter $0.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="otherOutside" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Taxes already paid on this outside income
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">If you've already sent quarterly estimated payments to the IRS for this income, enter that total here. Don't include your regular W-2 withholding — that was Step 5.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="outsideWithheld" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 8: Capital gains + estimated payments -->
+      <div class="wiz-step" data-step="8">
+        <div class="wiz-q">Did you sell any stocks or investments this year?</div>
+        <div class="wiz-badge-opt">Optional — skip if you didn't sell anything</div>
+        <div class="wiz-hint" style="margin-top:8px">When you sell stocks for a profit, that's a capital gain — and brokerages usually don't withhold any tax on it. This is a common source of surprise bills.</div>
+        <div class="wiz-field-row" style="margin-top:20px">
+          <div class="wiz-field">
+            <div class="wiz-field-label">Profits from stocks held <strong>over 1 year</strong>
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Lower tax rate (0–20%). In your brokerage: "Realized Gains & Losses" or "Tax Center" → long-term gains. Only count stocks you've already sold.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="ltcg" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Profits from stocks held <strong>under 1 year</strong>
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Taxed at your normal income rate — same as a paycheck. Look for "short-term gains" in your brokerage tax center.</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="stcg" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label">Losses from selling at a loss
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">If you sold something for less than you paid, that reduces your taxable gains. Enter as a positive number (e.g. enter 5,000 if you lost $5,000).</span></span>
+            </div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="capLoss" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <details class="wiz-find-it">
+          <summary class="wiz-find-label">📄 Where to find this in your brokerage account<span class="wiz-find-label-chevron">▼</span></summary>
+          <div class="wiz-paystub">
+            <div class="ps-header">Brokerage Account (Fidelity / Schwab / Robinhood / E*TRADE)</div>
+            <div class="ps-subheader">Navigate to: <strong>Accounts → Tax Center</strong> or <strong>Balances → Realized Gains &amp; Losses</strong></div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Long-Term Realized Gains</span>
+              <span class="ps-val ps-arrow">← held 1+ year</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Short-Term Realized Gains</span>
+              <span class="ps-val ps-arrow">← held under 1 year</span>
+            </div>
+            <div class="ps-row ps-highlight">
+              <span class="ps-key">Realized Losses (any term)</span>
+              <span class="ps-val ps-arrow">← enter as positive number</span>
+            </div>
+            <div class="ps-note">💡 Only count investments you've <strong>already sold</strong> this year. Unrealized gains (still holding) don't count yet.</div>
+          </div>
+        </details>
+        <div class="wiz-divider"></div>
+        <div class="wiz-field-label" style="font-size:14px;font-weight:600;margin-bottom:4px">Have you already sent any estimated tax payments to the IRS this year?</div>
+        <div class="wiz-hint" style="margin-top:0;margin-bottom:16px">These are optional payments you can send directly to the IRS ahead of April — separate from paycheck withholding. Most people haven't done this.</div>
+        <div class="wiz-field-row">
+          <div class="wiz-field">
+            <div class="wiz-field-label" style="font-size:11px">Total paid so far (if you know)</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="estPayYTD" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label" style="font-size:11px">Q1 paid (due Apr 15)</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="estQ1" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label" style="font-size:11px">Q2 paid (due Jun 15)</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="estQ2" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label" style="font-size:11px">Q3 paid (due Sep 15)</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="estQ3" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="wiz-field">
+            <div class="wiz-field-label" style="font-size:11px">Q4 paid (due Jan 15)</div>
+            <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+              <input class="wiz-input wiz-input-sm" type="text" id="estQ4" placeholder="0" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <div class="wiz-divider"></div>
+        <div class="wiz-field-label" style="margin-bottom:6px">Tax already withheld on stock sales (RSU / ESPP)
+          <span class="tip" style="display:inline-flex">?<span class="tipbox">If your company withheld tax when RSUs vested or ESPP shares sold, enter that here. Most regular brokerage sales have $0 withheld.</span></span>
+        </div>
+        <div class="wiz-input-wrap"><span class="wiz-prefix">$</span>
+          <input class="wiz-input wiz-input-sm" type="text" id="cgWithheld" placeholder="0" min="0" inputmode="numeric">
+        </div>
+        <div class="wiz-actions">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next primary" onclick="calculate()">Calculate →</button>
+        </div>
+        <p class="cta-note" style="margin-top:16px;text-align:left">Estimates only — not tax advice. Uses 2025 federal brackets.</p>
+      </div>
+
+    </div><!-- end wiz-track -->
+  </div><!-- end wizard -->
+
+    <!-- ───── RESULTS ───── -->
+  <div id="results">
+
+    <!-- HERO -->
+    <div class="hero-card" id="hero-card">
+      <div class="hero-label" id="hero-label">Total balance</div>
+      <div class="hero-amount" id="hero-amount">—</div>
+      <div class="hero-breakout-pills" id="hero-breakout" style="display:none">
+        <div id="hero-breakout-eq"></div>
+      </div>
+      <div class="hero-sub" id="hero-sub">—</div>
+      <div id="hero-cta"></div>
+    </div>
+
+    <!-- PLAIN ENGLISH SUMMARY -->
+    <div class="results-summary-card" id="results-summary">
+      <div class="rsc-title">In plain English</div>
+      <div class="rsc-body" id="rsc-body">—</div>
+    </div>
+
+    <!-- STATS ROW — simplified to 3 key numbers -->
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card">
+        <div class="stat-label" id="stat-income-label">Your total income this year</div>
+        <div class="stat-value" id="r-income">—</div>
+        <div class="stat-sub" id="r-income-sub">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total tax owed on that income</div>
+        <div class="stat-value" id="r-liability">—</div>
+        <div class="stat-sub" id="r-rate-sub">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Already withheld / paid this year</div>
+        <div class="stat-value" id="r-withheld">—</div>
+        <div class="stat-sub" id="r-withheld-sub">The gap is what you still owe (or get back)</div>
+      </div>
+    </div>
+
+    <!-- WHAT TO DO NEXT — recommendation card moved up -->
+    <div class="results-section-header">What to do about it</div>
+    <div class="rec-card" id="rec-card">
+      <div class="rec-placeholder">Calculate your numbers above to get your personalized recommendation.</div>
+    </div>
+
+    <!-- ACTION PLAN -->
+    <div id="action-plan"></div>
+
+    <!-- BREAKDOWN — collapsed, for detail-seekers -->
+    <div class="breakdown-card">
+      <button class="breakdown-toggle" onclick="toggleBreakdown(this)">
+        <span>See the full math behind these numbers</span>
+        <span class="toggle-chevron">▼</span>
+      </button>
+      <div class="breakdown-body" id="breakdown-body">
+        <div id="breakdown-inner"></div>
+      </div>
+    </div>
+
+    <!-- QUARTERLY TRACKER -->
+    <div id="quarterly-summary"></div>
+
+    <!-- 401K SUMMARY -->
+    <div id="k401-summary"></div>
+
+    <!-- DEADLINES -->
+    <div class="deadlines-card">
+      <span class="dl-label" id="dl-title">Estimated Payment Deadlines</span>
+      <div class="dl-pills" id="dl-pills"></div>
+    </div>
+
+    <!-- Pay the IRS directly (EFTPS) -->
+    <div class="results-section-header">Pay the IRS directly each quarter</div>
+    <div class="eftps-card">
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:16px">Think of this as a bank transfer to the IRS. Instead of adjusting your paycheck, you log into <strong>eftps.gov</strong>, enter an amount, and it debits your bank account. EFTPS (Electronic Federal Tax Payment System) is the IRS's free system — setup takes about 5 minutes.</div>
+      <div class="eftps-steps">
+        <div class="eftps-step">
+          <div class="eftps-n">Step 01</div>
+          <div class="eftps-title">Create a free account at eftps.gov</div>
+          <div class="eftps-body">Go to <strong>eftps.gov</strong> and enroll. You'll need your Social Security number and bank account info. They mail you a PIN — allow ~5 days before your deadline.</div>
+          <a href="https://www.eftps.gov" target="_blank" class="ext-btn">eftps.gov →</a>
+        </div>
+        <div class="eftps-step">
+          <div class="eftps-n">Step 02</div>
+          <div class="eftps-title">Make a payment</div>
+          <div class="eftps-body">Log in → <strong>Make a Tax Payment</strong> → Tax Form: <strong>1040ES</strong> → Tax Type: <strong>Estimated Tax</strong> → enter the amount from above. It comes straight out of your bank account.</div>
+        </div>
+        <div class="eftps-step">
+          <div class="eftps-n">Step 03</div>
+          <div class="eftps-title">Save your confirmation</div>
+          <div class="eftps-body">Screenshot the confirmation number. Share it with your CPA in April — it gets credited against your balance and protects you from underpayment penalties.</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;margin-top:14px">Prefer not to enroll? IRS Direct Pay at <a href="https://www.irs.gov/payments" target="_blank" style="color:inherit">irs.gov/payments</a> accepts one-time payments with no account needed.</p>
+    </div>
+
+    <!-- W-4 HOW-TO -->
+    <div class="results-section-header" style="margin-top:8px">Update your W-4 withholding</div>
+    <div class="w4-card">
+      <div class="w4-rec-banner" id="w4-banner" style="display:none">
+        <div class="w4-rec-icon">📋</div>
+        <div class="w4-rec-text">Calculate your numbers above to get a personalized W-4 recommendation.</div>
+      </div>
+      <div class="provider-tabs">
+        <button class="ptab active" onclick="switchTab('workday')">Workday</button>
+        <button class="ptab" onclick="switchTab('adp')">ADP</button>
+        <button class="ptab" onclick="switchTab('gusto')">Gusto</button>
+        <button class="ptab" onclick="switchTab('rippling')">Rippling</button>
+        <button class="ptab" onclick="switchTab('paylocity')">Paylocity</button>
+        <button class="ptab" onclick="switchTab('sequoia')">Sequoia</button>
+        <button class="ptab" onclick="switchTab('other')">Paper W-4</button>
+      </div>
+
+      <!-- WORKDAY -->
+      <div class="provider-content active" id="tab-workday">
+        <div class="step-list">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div>
+              <div class="step-title">Open the Pay worklet</div>
+              <div class="step-desc">Log into Workday at <code>yourcompany.workday.com</code>. From the home dashboard, click the <strong>Pay</strong> worklet (blue dollar sign icon).</div>
+              <div class="mockup">
+                <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">yourcompany.workday.com</span></div>
+                <div class="mockup-body">
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+                    <div style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:8px;padding:12px 6px;text-align:center;font-size:10px;color:#999">Benefits</div>
+                    <div style="background:#fff;border:1.5px solid #1a1a1a;border-radius:8px;padding:12px 6px;text-align:center;font-size:10px;font-weight:700">Pay ⬡</div>
+                    <div style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:8px;padding:12px 6px;text-align:center;font-size:10px;color:#999">Time Off</div>
+                    <div style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:8px;padding:12px 6px;text-align:center;font-size:10px;color:#999">Profile</div>
+                  </div>
+                  <div class="callout-arrow"><span class="arrow-sym">↑</span><span class="arrow-txt">Click the "Pay" worklet</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div>
+              <div class="step-title">Go to Withholding Elections</div>
+              <div class="step-desc">Inside Pay, click the <strong>Actions</strong> tab on the left. Select <strong>Withholding Elections</strong> (may also show as "Tax Withholding" or "Federal Withholding").</div>
+              <div class="mockup">
+                <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">Pay — Actions</span></div>
+                <div class="mockup-body">
+                  <div class="mock-row"><span class="mock-row-lbl">Payment Elections</span></div>
+                  <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Withholding Elections ★</span></div>
+                  <div class="mock-row"><span class="mock-row-lbl">View Pay Slip</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div>
+              <div class="step-title">Update Step 4c — Extra Withholding</div>
+              <div class="step-desc">Scroll to the Federal section. Find <strong>Step 4c — Additional Withholding per Paycheck</strong>. Enter the amount from your recommendation above. Step 4a (other income) is optional — most commission earners leave it blank.</div>
+              <div class="mockup">
+                <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">Withholding Elections — Federal W-4</span></div>
+                <div class="mockup-body">
+                  <div class="mock-row"><span class="mock-row-lbl">Step 2 — Multiple Jobs</span><span class="mock-row-val">No</span></div>
+                  <div class="mock-row"><span class="mock-row-lbl">Step 3 — Dependents ($)</span><span class="mock-row-val">0.00</span></div>
+                  <div class="mock-row"><span class="mock-row-lbl">Step 4a — Other Income ($)</span><span class="mock-row-val">0.00</span></div>
+                  <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Step 4c — Extra Withholding ($) ★</span><span class="mock-row-val" id="wd-4c" style="font-weight:700">___</span></div>
+                  <div class="mock-btn">Save</div>
+                  <div class="callout-arrow" style="margin-top:8px"><span class="arrow-sym">↑</span><span class="arrow-txt">Enter your recommended $ amount in Step 4c</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">4</div>
+            <div>
+              <div class="step-title">Submit and verify</div>
+              <div class="step-desc">Click <strong>OK</strong> or <strong>Submit</strong>. Workday may ask for your password to confirm. Check your next pay stub to make sure the new withholding amount appears in the deductions section.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADP -->
+      <div class="provider-content" id="tab-adp">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Log into ADP</div>
+            <div class="step-desc">Go to <code>my.adp.com</code> and sign in. Click <strong>Myself</strong> in the top nav, then <strong>Pay</strong>.</div>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Open Tax Withholdings</div>
+            <div class="step-desc">In the left sidebar, click <strong>Tax Withholdings</strong> or <strong>Tax Setup</strong>.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">my.adp.com / Myself / Pay</span></div>
+              <div class="mockup-body">
+                <div class="mock-row"><span class="mock-row-lbl">Pay Statements</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Tax Withholdings ★</span></div>
+                <div class="mock-row"><span class="mock-row-lbl">Direct Deposit</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">3</div><div>
+            <div class="step-title">Edit Federal W-4 → Step 4c</div>
+            <div class="step-desc">Click <strong>Edit</strong> next to Federal W-4. Find <strong>Step 4c — Additional Amount to Withhold</strong>. Enter your recommended extra per paycheck and click <strong>Save</strong>.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">Federal W-4</span></div>
+              <div class="mockup-body">
+                <div class="mock-row"><span class="mock-row-lbl">Filing Status</span><span class="mock-row-val">Single</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Step 4c — Additional Withholding ★</span><span class="mock-row-val" id="adp-4c" style="font-weight:700">___</span></div>
+                <div class="mock-btn">Save Changes</div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- GUSTO -->
+      <div class="provider-content" id="tab-gusto">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Log into Gusto</div>
+            <div class="step-desc">Go to <code>app.gusto.com</code>. Click your profile icon → <strong>Tax & Financial Information</strong>.</div>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Find Federal Tax Withholding</div>
+            <div class="step-desc">Under Taxes & Compliance, click <strong>Federal Tax Withholding (W-4)</strong> → click the pencil edit icon.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">app.gusto.com / taxes</span></div>
+              <div class="mockup-body">
+                <div class="mock-row"><span class="mock-row-lbl">State Tax Withholding</span><span class="mock-row-val" style="color:#3b82f6">Edit ✎</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Federal Tax Withholding (W-4) ★</span><span class="mock-row-val" style="color:#3b82f6">Edit ✎</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">3</div><div>
+            <div class="step-title">Enter extra withholding in Step 4</div>
+            <div class="step-desc">Gusto walks you through the full W-4 flow. On <strong>Step 4 (Optional)</strong>, enter your amount in the <strong>"(c) Extra withholding"</strong> field. Complete the flow and click <strong>Save</strong>.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- RIPPLING -->
+      <div class="provider-content" id="tab-rippling">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Open Rippling → Me → Payroll</div>
+            <div class="step-desc">Log in at <code>app.rippling.com</code>. Left sidebar → <strong>Me</strong> → <strong>Payroll</strong> → <strong>Tax Information</strong>.</div>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Click "Update W-4"</div>
+            <div class="step-desc">Under the Federal section, click <strong>Update W-4</strong>. On the <strong>Other Adjustments</strong> step of the wizard, enter your extra withholding amount.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">app.rippling.com / payroll / tax</span></div>
+              <div class="mockup-body">
+                <div class="mock-row"><span class="mock-row-lbl">Filing Status</span><span class="mock-row-val">Single</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Extra Withholding per Paycheck ★</span><span class="mock-row-val" id="rip-4c" style="font-weight:700">___</span></div>
+                <div class="mock-btn">Update W-4</div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">3</div><div>
+            <div class="step-title">E-sign to confirm</div>
+            <div class="step-desc">Rippling requires you to e-sign your updated W-4. Review the summary, click <strong>Sign</strong>, and it applies to your next pay run.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- PAYLOCITY -->
+      <div class="provider-content" id="tab-paylocity">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Log into Paylocity Self Service</div>
+            <div class="step-desc">Go to <code>access.paylocity.com</code>. After signing in, navigate to <strong>Pay</strong> → <strong>Tax Setup</strong>.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">access.paylocity.com</span></div>
+              <div class="mockup-body">
+                <div class="mock-nav">
+                  <div class="mnav-item">Dashboard</div>
+                  <div class="mnav-item active">Pay ▾</div>
+                  <div class="mnav-item">HR</div>
+                </div>
+                <div class="mock-row"><span class="mock-row-lbl">Checks</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Tax Setup ★</span></div>
+                <div class="mock-row"><span class="mock-row-lbl">Direct Deposit</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Edit Federal → Additional Withholding</div>
+            <div class="step-desc">Click <strong>Edit</strong> on the Federal row. Find the <strong>Additional Federal Income Tax</strong> field (W-4 line 4c). Enter your recommended amount and click <strong>Save</strong>.</div>
+          </div></div>
+        </div>
+      </div>
+
+
+      <!-- SEQUOIA -->
+      <div class="provider-content" id="tab-sequoia">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Log into Sequoia One</div>
+            <div class="step-desc">Go to <code>app.sequoia.com</code> and sign in. Navigate to <strong>My Pay</strong> → <strong>Tax Withholding</strong> (or <strong>W-4</strong>).</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">app.sequoia.com</span></div>
+              <div class="mockup-body">
+                <div class="mock-nav">
+                  <div class="mnav-item">Home</div>
+                  <div class="mnav-item active">My Pay ▾</div>
+                  <div class="mnav-item">Benefits</div>
+                </div>
+                <div class="mock-row"><span class="mock-row-lbl">Pay Statements</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">Tax Withholding (W-4) ★</span></div>
+                <div class="mock-row"><span class="mock-row-lbl">Direct Deposit</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Open Federal Withholding</div>
+            <div class="step-desc">Click <strong>Edit</strong> on your Federal W-4 entry. Sequoia displays the W-4 sections inline — scroll to <strong>Step 4 (Optional Adjustments)</strong>.</div>
+          </div></div>
+          <div class="step"><div class="step-n">3</div><div>
+            <div class="step-title">Enter extra amount in Step 4(c)</div>
+            <div class="step-desc">In the <strong>Step 4(c) — Extra withholding</strong> field, enter your recommended amount. This is added to every paycheck on top of your normal withholding. Click <strong>Save & Submit</strong>.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">app.sequoia.com / pay / w4</span></div>
+              <div class="mockup-body">
+                <div style="font-size:11px;font-weight:600;margin-bottom:8px">Step 4 — Other Adjustments (Optional)</div>
+                <div class="mock-row"><span class="mock-row-lbl">4(a) — Other income (not from jobs)</span><span class="mock-row-val">$0</span></div>
+                <div class="mock-row"><span class="mock-row-lbl">4(b) — Deductions</span><span class="mock-row-val">$0</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">4(c) — Extra withholding ★</span><span class="mock-row-val" id="seq-4c" style="font-weight:700">___</span></div>
+                <div class="callout-arrow" style="margin-top:8px"><span class="arrow-sym">↑</span><span class="arrow-txt">Enter your recommended amount here</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">4</div><div>
+            <div class="step-title">Confirm with your HR team</div>
+            <div class="step-desc">Some Sequoia configurations route W-4 changes through an HR approval workflow. If your change doesn't take effect on the next paycheck, check with your HR or payroll contact to confirm it was processed.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- PAPER W-4 -->
+      <div class="provider-content" id="tab-other">
+        <div class="step-list">
+          <div class="step"><div class="step-n">1</div><div>
+            <div class="step-title">Download the latest W-4</div>
+            <div class="step-desc">Get the current W-4 directly from the IRS — don't use old versions.</div>
+            <a href="https://www.irs.gov/pub/irs-pdf/fw4.pdf" target="_blank" class="ext-btn" style="margin-top:8px;display:inline-flex">IRS W-4 PDF →</a>
+          </div></div>
+          <div class="step"><div class="step-n">2</div><div>
+            <div class="step-title">Fill in Step 4c only</div>
+            <div class="step-desc">Complete Step 1 (name, SSN, filing status). Then in <strong>Step 4c</strong>, enter the additional dollar amount per paycheck you want withheld. That's the only field you need to change.</div>
+            <div class="mockup">
+              <div class="mockup-topbar"><div class="mdot"></div><div class="mdot"></div><div class="mdot"></div><span class="murl">IRS Form W-4 (2024)</span></div>
+              <div class="mockup-body">
+                <div style="font-size:11px;font-weight:600;margin-bottom:8px">Step 4 — Other Adjustments (Optional)</div>
+                <div class="mock-row"><span class="mock-row-lbl">4a — Other income (not from jobs)</span><span class="mock-row-val">$0</span></div>
+                <div class="mock-row"><span class="mock-row-lbl">4b — Deductions</span><span class="mock-row-val">$0</span></div>
+                <div class="mock-row hl"><span class="mock-row-lbl" style="font-weight:600">4c — Extra withholding per paycheck ★</span><span class="mock-row-val" id="paper-4c" style="font-weight:700">___</span></div>
+                <div class="callout-arrow" style="margin-top:8px"><span class="arrow-sym">↑</span><span class="arrow-txt">This is the only field you need to change</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="step"><div class="step-n">3</div><div>
+            <div class="step-title">Submit to HR or payroll</div>
+            <div class="step-desc">Sign and date Step 5. Email the completed PDF to your HR department or payroll contact. Changes typically apply within 1–2 pay periods.</div>
+          </div></div>
+        </div>
+      </div>
+    </div><!-- end w4-card -->
+
+  </div><!-- end #results -->
+
+</div><!-- end .page -->
+
+<script>
+// ── Tax Data ──
+const STD = { single:15750, mfj:31500, mfs:15750, hoh:23625 }; // 2025 tax year (OBBB-adjusted)
+const BRACKETS = {
+  // 2025 tax year — bracket widths (each entry = [width of this bracket, rate])
+  single: [[11925,.10],[36550,.12],[54875,.22],[93950,.24],[53225,.32],[375825,.35],[Infinity,.37]],
+  mfj:    [[23850,.10],[73100,.12],[109750,.22],[187900,.24],[106450,.32],[250550,.35],[Infinity,.37]],
+  mfs:    [[11925,.10],[36550,.12],[54875,.22],[93950,.24],[53225,.32],[187900,.35],[Infinity,.37]],
+  hoh:    [[17000,.10],[47850,.12],[38500,.22],[93950,.24],[53200,.32],[375850,.35],[Infinity,.37]]
+};
+// State tax data — progressive brackets where applicable (2025 tax year)
+// Format: { n: name, l: local flat rate, std: standard deduction (single),
+//           brackets: [[limit, rate], ...] cumulative like federal,
+//           flat: flat rate (for flat-tax states) }
+const STATES = {
+  none: { n:'No State Tax', brackets:[], std:0, l:0 },
+
+  // California — progressive 1%–13.3%, std deduction $5,540 single
+  ca: { n:'California', l:0, std:5540, brackets:[
+    [10756,0.01],[15656,0.02],[24986,0.04],[34930,0.06],[48942,0.08],
+    [254250,0.093],[508500,0.103],[1000000,0.113],[Infinity,0.133]
+  ]},
+
+  // New York State — progressive 4%–10.9%, std deduction $8,000 single
+  ny: { n:'New York', l:0, std:8000, brackets:[
+    [17150,0.04],[23600,0.045],[27900,0.0525],[161550,0.055],
+    [323200,0.06],[2155350,0.0685],[5000000,0.0965],[25000000,0.103],[Infinity,0.109]
+  ]},
+
+  // NY + NYC — same state brackets + NYC local flat 3.876%
+  nyc: { n:'NY + NYC', l:0.03876, std:8000, brackets:[
+    [17150,0.04],[23600,0.045],[27900,0.0525],[161550,0.055],
+    [323200,0.06],[2155350,0.0685],[5000000,0.0965],[25000000,0.103],[Infinity,0.109]
+  ]},
+
+  // New Jersey — progressive 1.4%–10.75%, std deduction $1,000 single
+  nj: { n:'New Jersey', l:0, std:1000, brackets:[
+    [20000,0.014],[35000,0.0175],[40000,0.035],[75000,0.0553],
+    [500000,0.0637],[1000000,0.0897],[Infinity,0.1075]
+  ]},
+
+  // Massachusetts — 9% on income over $1M, 5% flat otherwise
+  ma: { n:'Massachusetts', l:0, std:4400, brackets:[
+    [1000000,0.05],[Infinity,0.09]
+  ]},
+
+  // Minnesota — progressive 5.35%–9.85%
+  mn: { n:'Minnesota', l:0, std:12900, brackets:[
+    [30070,0.0535],[98760,0.068],[183340,0.0785],[Infinity,0.0985]
+  ]},
+
+  // Oregon — progressive 4.75%–9.9%
+  or: { n:'Oregon', l:0, std:2420, brackets:[
+    [4050,0.0475],[10200,0.0675],[125000,0.0875],[Infinity,0.099]
+  ]},
+
+  // Flat-rate states
+  il: { n:'Illinois', flat:0.0495, std:2425, brackets:[], l:0 },
+  co: { n:'Colorado', flat:0.044,  std:14600, brackets:[], l:0 },
+  nc: { n:'North Carolina', flat:0.0475, std:10750, brackets:[], l:0 },
+  pa: { n:'Pennsylvania', flat:0.0307, std:0, brackets:[], l:0 },
+  mi: { n:'Michigan', flat:0.0425, std:5600, brackets:[], l:0 },
+  az: { n:'Arizona', flat:0.025,  std:13850, brackets:[], l:0 },
+  ga: { n:'Georgia', flat:0.055,  std:12000, brackets:[], l:0 },
+  va: { n:'Virginia', flat:0.0575, std:8500, brackets:[], l:0 },
+  oh: { n:'Ohio', flat:0.0399,   std:2400, brackets:[], l:0 },
+
+  // No income tax states
+  tx: { n:'Texas', brackets:[], std:0, l:0 },
+  fl: { n:'Florida', brackets:[], std:0, l:0 },
+  wa: { n:'Washington', brackets:[], std:0, l:0 },
+};
+
+// Calculate state income tax using progressive brackets or flat rate
+function stateTax(income, state) {
+  const si = STATES[state] || STATES.none;
+  const taxable = Math.max(0, income - (si.std || 0));
+  if (si.flat) return taxable * si.flat;
+  if (!si.brackets || si.brackets.length === 0) return 0;
+  // Progressive
+  let tax = 0, rem = taxable, prev = 0;
+  for (const [lim, rate] of si.brackets) {
+    const slice = Math.min(rem, lim - prev);
+    if (slice <= 0) break;
+    tax += slice * rate;
+    rem -= slice;
+    prev = lim;
+    if (rem <= 0) break;
+  }
+  return tax;
+}
+
+// For backward compat — effective state rate (used for projected withholding estimates)
+function stateEffectiveRate(income, state) {
+  if (income <= 0) return 0;
+  return stateTax(income, state) / income;
+}
+// ── Dynamic date helpers ──────────────────────────────────────────────
+// Tax year = the calendar year currently in progress (Jan 1 – Dec 31).
+// Estimated payment deadlines are for the FOLLOWING year (filing year).
+// This means the calculator is always accurate regardless of when it's opened.
+(function() {
+  const now = new Date();
+  const TAX_YEAR = now.getFullYear();       // e.g. 2025 when used in 2025, 2026 in 2026
+  const FILING_YEAR = TAX_YEAR + 1;         // year you file / pay balance due
+  window.TAX_YEAR = TAX_YEAR;
+  window.FILING_YEAR = FILING_YEAR;
+  window.EOY = new Date(TAX_YEAR, 11, 31);  // Dec 31 of current tax year
+
+  // IRS estimated payment schedule for the current tax year:
+  // Q1 due April 15 of filing year, Q2 June 15, Q3 Sep 15, Q4 Jan 15 of filing year+1
+  // Note: if Apr 15 falls on weekend/holiday IRS shifts it — we keep it simple here
+  window.DEADLINES = [
+    {q:'Q1', label:`Apr 15, ${FILING_YEAR}`,   date: new Date(`${FILING_YEAR}-04-15`)},
+    {q:'Q2', label:`Jun 15, ${FILING_YEAR}`,   date: new Date(`${FILING_YEAR}-06-15`)},
+    {q:'Q3', label:`Sep 15, ${FILING_YEAR}`,   date: new Date(`${FILING_YEAR}-09-15`)},
+    {q:'Q4', label:`Jan 15, ${FILING_YEAR+1}`, date: new Date(`${FILING_YEAR+1}-01-15`)},
+  ];
+})();
+
+function fedTax(income, filing) {
+  const taxable = Math.max(0, income - (STD[filing]||14600));
+  let tax=0, rem=taxable;
+  for (const [lim,rate] of (BRACKETS[filing]||BRACKETS.single)) {
+    if(rem<=0) break; const c=Math.min(rem,lim); tax+=c*rate; rem-=c;
+  }
+  return tax;
+}
+function marginalRate(income, filing) {
+  const taxable = Math.max(0, income - (STD[filing]||14600));
+  let rem = taxable;
+  for (const [lim,rate] of (BRACKETS[filing]||BRACKETS.single)) {
+    if(rem<=lim) return (rate*100).toFixed(0)+'%'; rem-=lim;
+  }
+  return '37%';
+}
+function fmt(n, abs=false) {
+  const v = abs ? Math.abs(n) : n;
+  const a = Math.abs(v);
+  const s = '$' + Math.round(a).toLocaleString('en-US');
+  return v < 0 ? '−' + s : s;
+}
+function g(id) { const el = document.getElementById(id); return el ? parseFloat((el.value||'').replace(/,/g,''))||0 : 0; } // handles decimals
+function gv(id) { return document.getElementById(id).value; }
+
+function initTooltips() {
+  // Shared floating tooltip element — avoids clipping entirely
+  const floater = document.createElement('div');
+  floater.className = 'tipbox-floater';
+  floater.style.cssText = `
+    position: fixed; z-index: 9999; pointer-events: none;
+    background: #1a1a1a; color: #fff;
+    font-size: 11px; font-weight: 400; line-height: 1.5;
+    padding: 10px 12px; border-radius: 6px;
+    width: 240px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    white-space: normal; opacity: 0; transition: opacity 0.12s;
+    top: 0; left: 0;
+  `;
+  const arrow = document.createElement('div');
+  arrow.style.cssText = `
+    position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1a1a1a;
+  `;
+  floater.appendChild(arrow);
+  document.body.appendChild(floater);
+
+  document.querySelectorAll('.tip').forEach(tip => {
+    const src = tip.querySelector('.tipbox');
+    if (!src) return;
+    const text = src.textContent;
+
+    tip.addEventListener('mouseenter', () => {
+      floater.childNodes[0].textContent = text; // update text (before arrow node)
+      floater.insertBefore(document.createTextNode(text), arrow);
+      // Remove old text nodes
+      [...floater.childNodes].forEach(n => { if (n !== arrow && n.nodeType === 3) floater.removeChild(n); });
+      floater.innerHTML = '';
+      floater.textContent = text;
+      floater.appendChild(arrow);
+
+      floater.style.opacity = '0';
+      floater.style.visibility = 'hidden';
+      floater.style.display = 'block';
+      document.body.appendChild(floater); // ensure in DOM
+
+      const bw = 240;
+      const bh = floater.offsetHeight;
+      const r = tip.getBoundingClientRect();
+
+      let left = r.left + r.width / 2 - bw / 2;
+      let top = r.top - bh - 10;
+      let arrowTop = true;
+
+      left = Math.max(8, Math.min(left, window.innerWidth - bw - 8));
+      if (top < 8) { top = r.bottom + 10; arrowTop = false; }
+
+      arrow.style.cssText = arrowTop
+        ? 'position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a1a;'
+        : 'position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#1a1a1a;';
+
+      const arrowLeft = Math.round(r.left + r.width / 2 - left);
+      arrow.style.left = arrowLeft + 'px';
+      arrow.style.transform = 'translateX(-50%)';
+
+      floater.style.left = left + 'px';
+      floater.style.top = top + 'px';
+      floater.style.visibility = 'visible';
+      floater.style.opacity = '1';
+    });
+
+    tip.addEventListener('mouseleave', () => {
+      floater.style.opacity = '0';
+    });
+  });
+}
+
+function initSelects() {
+  document.querySelectorAll('.wiz-select').forEach(sel => {
+    function update() {
+      sel.classList.toggle('unselected', sel.value === '');
+    }
+    sel.addEventListener('change', update);
+    update();
+  });
+}
+
+function getRemainingPayPeriods(freq) {
+  const now=new Date();
+  return Math.max(0,Math.round(((EOY-now)/(864e5))/(365/freq)));
+}
+function getNextDeadline() {
+  const now=new Date();
+  return DEADLINES.find(d=>d.date>now)||DEADLINES[DEADLINES.length-1];
+}
+function getRemainingDeadlines() {
+  const now=new Date(); return DEADLINES.filter(d=>d.date>now).length;
+}
+
+function calculate() {
+  const base=g('base'), commYTD=g('commYTD'), commRem=g('commRemaining');
+  const commRate=g('commRate'), payFreq=parseInt(gv('payFreq'))||26;
+  const fedWH=g('fedWithheld'), stateWH=g('stateWithheld');
+  const extra4c=g('currentExtra4c'), other4a=g('current4a');
+  const k401ytd=g('k401ytd'), k401total=g('k401total'), k401type=gv('k401type');
+  const estYTD=g('estPayYTD'), q1=g('estQ1'), q2=g('estQ2'), q3=g('estQ3'), q4=g('estQ4');
+  const ltcg=g('ltcg'), stcg=g('stcg'), capLoss=g('capLoss'), cgWithheld=g('cgWithheld');
+  const freelanceIncome=g('freelanceIncome'), rentalIncome=g('rentalIncome');
+  const interestDiv=g('interestDiv'), otherOutside=g('otherOutside');
+  const outsideWithheld=g('outsideWithheld');
+  const totalOutside = freelanceIncome + rentalIncome + interestDiv + otherOutside;
+  const seTax = freelanceIncome * 0.9235 * 0.153; // self-employment tax on freelance
+  const seDeduction = seTax / 2; // SE tax deduction
+  const filing=gv('filing'), si=STATES[gv('state')]||STATES.none;
+  // MFJ: spouse income and withholding fold into joint liability
+  const spouseIncome = filing === 'mfj' ? g('spouseIncome') : 0;
+  const spouseWithheld = filing === 'mfj' ? g('spouseWithheld') : 0;
+
+  const remPP = getRemainingPayPeriods(payFreq);
+  const remQ = getRemainingDeadlines();
+  const bpp = base/payFreq;
+  const baseRate = 0.22;
+
+  // Projected future withholding
+  const pFedBase = bpp*baseRate*remPP;
+  const pFedComm = commRem*commRate;
+  const pFed4c   = extra4c*remPP;
+  const pFed4a   = (other4a/payFreq)*baseRate*remPP;
+
+  // State projections — two separate rates:
+  // 1. Regular paychecks: effective rate on total projected income (reasonable estimate)
+  // 2. Commission checks: AGGREGATE METHOD — payroll annualizes the commission and withholds
+  //    at the marginal rate that income level implies. For high earners this is the top
+  //    state bracket, which is much higher than the effective rate on the full year.
+  //    We use the marginal rate at projected total income as the best proxy.
+  const projTotalIncome = base+commYTD+commRem+totalOutside; // full-year projection
+  const stEffRate = stateEffectiveRate(projTotalIncome, gv('state'));
+
+  // Aggregate method rate: marginal state+local rate at projected income level
+  // This is what payroll actually withholds on each commission check
+  function stateMarginalRate(income, stateKey) {
+    const si2 = STATES[stateKey] || STATES.none;
+    const taxable = Math.max(0, income - (si2.std || 0));
+    if (si2.flat) return si2.flat + (si2.l || 0);
+    if (!si2.brackets || si2.brackets.length === 0) return 0;
+    let rem = taxable, prev = 0;
+    for (const [lim, rate] of si2.brackets) {
+      if (rem <= lim - prev) return rate + (si2.l || 0);
+      rem -= (lim - prev); prev = lim;
+    }
+    return (si2.brackets[si2.brackets.length-1][1] || 0) + (si2.l || 0);
+  }
+  const stAggRate = stateMarginalRate(projTotalIncome, gv('state'));
+
+  const pStateBase = bpp*stEffRate*remPP;        // base salary: effective rate
+  const pStateComm = commRem*stAggRate;           // commissions: aggregate/marginal rate
+  const totalProjFed   = fedWH+pFedBase+pFedComm+pFed4c+pFed4a+outsideWithheld;
+  const totalProjState = stateWH+pStateBase+pStateComm;
+
+  // 401k
+  // For mixed: only traditional portion is deductible. Read from split input if available.
+  const k401traditional = g('k401traditional');
+  const k401ded = k401type === 'roth' ? 0
+    : k401type === 'mixed' ? k401traditional
+    : k401total; // traditional: full amount
+  const k401rem = Math.max(0, k401ded-k401ytd);
+  const totalIncome = base+commYTD+commRem+totalOutside;
+  const totalIncomeW2Only = base+commYTD+commRem; // for W-4 context
+
+  // Capital gains
+  const netCapLoss = Math.min(capLoss, ltcg+stcg); // losses offset gains
+  const netLTCG = Math.max(0, ltcg - Math.min(capLoss, ltcg));
+  const remainingLoss = Math.max(0, capLoss - ltcg);
+  const netSTCG = Math.max(0, stcg - remainingLoss);
+  const ordinaryIncomeDeduction = Math.min(3000, Math.max(0, capLoss - ltcg - stcg)); // up to $3k can offset ordinary income
+
+  // LTCG rate based on total income
+  function ltcgRate(income, filing) {
+    const thresholds = {
+      // 2025 tax year LTCG thresholds
+      single: [[48350, 0], [583400, 0.15], [Infinity, 0.20]],
+      mfj:    [[96700, 0], [600050, 0.15], [Infinity, 0.20]],
+      mfs:    [[48350, 0], [300000, 0.15], [Infinity, 0.20]],
+      hoh:    [[64750, 0], [566700, 0.15], [Infinity, 0.20]],
+    };
+    const t = thresholds[filing]||thresholds.single;
+    for (const [lim, rate] of t) { if(income<=lim) return rate; }
+    return 0.20;
+  }
+
+  // Taxable income = wages + STCG (short-term is ordinary income)
+  const taxableIncome = Math.max(0, totalIncome + netSTCG - k401ded - seDeduction - ordinaryIncomeDeduction);
+  const fedLiabWages = fedTax(taxableIncome, filing);
+
+  // LTCG tax on top (NIIT of 3.8% also applies above certain thresholds)
+  const ltcgTaxRate = ltcgRate(totalIncome + netSTCG + netLTCG, filing);
+  const niitApplies = (totalIncome + netSTCG + netLTCG) > (filing==='mfj'?250000:200000);
+  const ltcgTax = netLTCG * ltcgTaxRate;
+  const niitTax = niitApplies ? netLTCG * 0.038 : 0;
+  const fedLiab = fedLiabWages + ltcgTax + niitTax + seTax;
+
+  // State liability: NY uses its own standard deduction (not federal $15,750)
+  // taxableIncome already has federal std ded removed — recalculate from total income
+  // using the state's own std ded for an accurate state taxable base
+  const STD_FED = {'single':15750,'mfj':31500,'mfs':15750,'hoh':23625}[filing] || 15750;
+  const stateStd = si.std || 0;
+  // State taxable = total income - state std ded - 401k deduction - SE deduction - cap loss offset
+  const stateTaxableIncome = Math.max(0, totalIncome + netSTCG + netLTCG - stateStd - k401ded - seDeduction - ordinaryIncomeDeduction);
+  const stateLiab = stateTax(stateTaxableIncome, gv('state')) + stateTaxableIncome * si.l;
+  const totalLiab = fedLiab+stateLiab;
+  const effRate = (totalIncome+netLTCG)>0 ? totalLiab/(totalIncome+netLTCG) : 0;
+  const cgTaxOwed = Math.max(0, ltcgTax + niitTax - cgWithheld);
+
+  // Estimated payments
+  const qSum = q1+q2+q3+q4;
+  const totalEst = Math.max(estYTD, qSum);
+
+  // Balances
+  const fedBal = fedLiab - totalProjFed - totalEst;
+  const stateBal = stateLiab - totalProjState;
+
+  // Recommended action
+  // EFTPS amount targets net gap (fed + state). If state is a refund it offsets federal owed.
+  const netGapTotal = Math.max(0, fedBal + stateBal);
+  const actionAmt = netGapTotal>0 ? (remQ>0 ? Math.ceil((netGapTotal/remQ)/100)*100 : Math.ceil(netGapTotal/100)*100) : 0;
+
+  // Smart withholding split: commission check vs base paycheck
+  // Quarterly commission checks: user can elect supplemental withholding on those specifically
+  // Biweekly base: avoid killing take-home — target no more than 25% increase in extra withholding
+  const maxBaseImpact = Math.round(bpp * 0.25 / 10) * 10; // max extra per base check, rounded to nearest $10
+  // Use netGapTotal (fed + state combined) as the target for all withholding recommendations
+  const extraPerCheckBase = netGapTotal>0 && remPP>0 ? Math.round(Math.min(maxBaseImpact, Math.ceil(netGapTotal/remPP/10)*10)) : 0;
+  const coveredByBase = extraPerCheckBase * remPP;
+  const stillUncoveredAfterBase = Math.max(0, netGapTotal - coveredByBase);
+  // Remaining gap should come from flat $ on next commission check withholding (or EFTPS)
+  const extraPerCommCheck = stillUncoveredAfterBase > 0 ? Math.ceil(stillUncoveredAfterBase/100)*100 : 0;
+  // Option C: pure W-4 4a route — declare outside income as "other income"
+  const w4a4Recommendation = totalOutside > 0 ? totalOutside : 0;
+  const w4a4CoveredAmount = (w4a4Recommendation / payFreq) * 0.22 * remPP;
+  // Legacy simple
+  const extraPerCheck = netGapTotal>0 && remPP>0 ? Math.ceil(netGapTotal/remPP/10)*10 : 0;
+
+  // ── HERO ──
+  const heroCard = document.getElementById('hero-card');
+  const heroAmt = document.getElementById('hero-amount');
+  const heroSub = document.getElementById('hero-sub');
+  const heroCta = document.getElementById('hero-cta');
+  const heroLabel = document.getElementById('hero-label');
+  const heroBreakout = document.getElementById('hero-breakout');
+
+  // Total balance = fed + state (both could be owed or refunded independently)
+  const totalBal = fedBal + stateBal;
+  const hasStateTax = si.r > 0 || si.l > 0;
+
+  function setBreakout(show) {
+    heroBreakout.style.display = show ? 'flex' : 'none';
+    if (!show) return;
+    const eq = document.getElementById('hero-breakout-eq');
+    if (!eq) return;
+
+    function pill(bal, label) {
+      const cls = bal > 200 ? 'red' : bal < -200 ? 'green' : 'neutral';
+      const sign = bal > 200 ? 'owes ' : bal < -200 ? 'refund ' : '';
+      const abs = fmt(Math.abs(bal), true);
+      return `<div class="bp-pill"><span class="bp-pill-label">${label}</span><span class="bp-pill-amt ${cls}">${sign}${abs}</span></div>`;
+    }
+
+    if (hasStateTax) {
+      eq.innerHTML = pill(fedBal, 'Federal') +
+        `<span class="bp-sep">+</span>` +
+        pill(stateBal, si.n || 'State');
+    } else {
+      eq.innerHTML = pill(fedBal, 'Federal') +
+        `<span class="bp-sep">·</span>` +
+        `<div class="bp-pill"><span class="bp-pill-label">State</span><span class="bp-pill-amt neutral">no tax</span></div>`;
+    }
+  }
+
+  if (totalBal > 500) {
+    const nextDeadlineLabel = getNextDeadline().label;
+    heroCard.style.borderColor = '#fcd34d';
+    heroCard.style.background = '#fff';
+    heroLabel.textContent = "Without any changes, you'll owe the IRS";
+    heroAmt.className = 'hero-amount owe';
+    heroAmt.style.color = '';
+    heroAmt.textContent = fmt(totalBal, true);
+    setBreakout(true);
+    const adjustLine = extraPerCheckBase > 0 && extraPerCommCheck > 0
+      ? `Fix it: add $${extraPerCheckBase.toLocaleString('en-US')}/paycheck to your W-4 + ${fmt(extraPerCommCheck)} on your next commission check.`
+      : extraPerCheckBase > 0
+      ? `Fix it: add $${extraPerCheckBase.toLocaleString('en-US')}/paycheck to your W-4 now — ${remPP} pay periods left.`
+      : `Fix it: pay ${fmt(actionAmt)} to the IRS before the next quarterly deadline.`;
+    heroSub.textContent = adjustLine;
+    heroCta.innerHTML = `<button class="hero-action-btn" onclick="document.getElementById('action-plan').scrollIntoView({behavior:'smooth'})">See your action plan ↓</button>`;
+  } else if (totalBal > 0) {
+    heroCard.style.borderColor = '#fde68a';
+    heroCard.style.background = '#fff';
+    heroLabel.textContent = "Without changes, you'll owe";
+    heroAmt.className = 'hero-amount';
+    heroAmt.style.color = '#d97706';
+    heroAmt.textContent = fmt(totalBal, true);
+    setBreakout(true);
+    heroSub.textContent = `Small gap — one payment before Dec 31, ${TAX_YEAR} closes it completely.`;
+    heroCta.innerHTML = `<button class="hero-action-btn" onclick="document.getElementById('action-plan').scrollIntoView({behavior:'smooth'})">See your action plan ↓</button>`;
+  } else {
+    heroCard.style.borderColor = '#bbf7bb';
+    heroCard.style.background = '#f0fdf0';
+    heroLabel.textContent = totalBal < -500 ? "Projected refund" : "You're on track";
+    heroAmt.className = 'hero-amount covered';
+    heroAmt.style.color = '';
+    heroAmt.textContent = totalBal < -500 ? fmt(Math.abs(totalBal), true) : '✓';
+    setBreakout(totalBal < -200 || hasStateTax);
+    heroSub.textContent = totalBal < -500
+      ? `Your withholding is over-covering your liability. See the action plan for ways to put that money to work sooner.`
+      : `Your current withholding is projected to cover your full liability. Recalculate any time a large commission hits.`;
+    heroCta.innerHTML = `<div class="hero-covered-badge">✓ No action required right now</div>`;
+  }
+
+  // ── STATS ──
+  document.getElementById('r-income').textContent = fmt(totalIncome);
+  const isMFJ = filing === 'mfj';
+  document.getElementById('r-income-sub').textContent = isMFJ
+    ? `${fmt(base)} yours + ${fmt(spouseIncome)} spouse + ${fmt(commYTD+commRem)} commissions`
+    : `${fmt(base)} base + ${fmt(commYTD+commRem)} commissions`;
+  const incomeLabelEl = document.getElementById('stat-income-label');
+  if (incomeLabelEl) incomeLabelEl.textContent = isMFJ ? 'Household income this year' : 'Your total income this year';
+  document.getElementById('r-liability').textContent = fmt(totalLiab);
+  document.getElementById('r-rate-sub').textContent = `${marginalRate(taxableIncome,filing)} marginal · ${(effRate*100).toFixed(1)}% effective rate`;
+
+  // "Already paid" stat
+  const paidEl = document.getElementById('r-withheld');
+  const paidSubEl = document.getElementById('r-withheld-sub');
+  if (paidEl) {
+    paidEl.textContent = fmt(totalProjFed + totalProjState + totalEst);
+    const diff = totalBal;
+    if (paidSubEl) {
+      if (diff > 200) paidSubEl.innerHTML = `${isMFJ ? 'Together you' : 'You'} still owe <strong style="color:var(--red)">${fmt(diff, true)}</strong> more`;
+      else if (diff < -200) paidSubEl.innerHTML = `You're over by <strong style="color:var(--green)">${fmt(Math.abs(diff), true)}</strong> — that's your refund`;
+      else paidSubEl.textContent = `Right on target — nothing left to pay`;
+    }
+  }
+
+  // Plain-English summary card
+  const rscBody = document.getElementById('rsc-body');
+  if (rscBody) {
+    // Figure out fed vs state split to explain the commission withholding dynamic
+    const fedOwed = fedBal > 200;
+    const stateRefund = stateBal < -200;
+    const hasState = si.l > 0 || (si.brackets && si.brackets.length > 0) || si.flat > 0;
+
+    // Commission over/under insight — short, specific, real numbers
+    let commInsight = '';
+    if (fedOwed && stateRefund && hasState) {
+      commInsight = ` <strong>Why the split:</strong> commission checks are federally withheld at 22% flat — too low for your bracket. State payroll over-withholds using the aggregate method, treating each check as your full annual income.`;
+    } else if (fedOwed && hasState) {
+      commInsight = ` Commission checks are withheld at 22% flat — too low for your bracket.`;
+    } else if (stateRefund && hasState) {
+      commInsight = ` State payroll over-withholds on commissions — treats each check as your full annual income, then you get the excess back.`;
+    }
+
+    if (totalBal > 500) {
+      const stateStr = hasState && stateBal < -200
+        ? ` A <span class="rsc-green">${si.n} refund of ${fmt(Math.abs(stateBal), true)}</span> offsets some of it.`
+        : hasState && stateBal > 200
+        ? ` You also owe <span class="rsc-red">${fmt(stateBal, true)}</span> to ${si.n}.`
+        : '';
+      rscBody.innerHTML = `${isMFJ ? 'Your household owes' : 'You owe'} <span class="rsc-red">${fmt(fedBal, true)}</span> federally.${stateStr} Net: <strong>${fmt(totalBal, true)} due in April</strong> if nothing changes.${commInsight}`;
+    } else if (totalBal < -500) {
+      const splitStr = fedOwed && stateRefund
+        ? `You owe <span class="rsc-red">${fmt(fedBal, true)}</span> federally but are getting <span class="rsc-green">${fmt(Math.abs(stateBal), true)}</span> back from ${si.n} — net refund of <span class="rsc-green">${fmt(Math.abs(totalBal), true)}</span>.`
+        : `You're on track for a <span class="rsc-green">${fmt(Math.abs(totalBal), true)} refund</span>.`;
+      rscBody.innerHTML = `${splitStr}${commInsight} That refund is your money sitting idle — see below to take it monthly instead.`;
+    } else {
+      rscBody.innerHTML = `You're on track — withholding is projected to cover your tax bill.${commInsight} Recalculate when the next commission hits.`;
+    }
+  }
+
+  // State stat (hidden in new layout, but keep for backward compat)
+  const stEl = document.getElementById('r-state');
+  const stSub = document.getElementById('r-state-sub');
+  if (stEl) {
+    if (si.r===0 && si.l===0) {
+      stEl.textContent = 'N/A'; stEl.className='stat-value';
+      if (stSub) stSub.textContent = 'no state income tax';
+    } else {
+      stEl.textContent = fmt(stateBal, true);
+      stEl.className = 'stat-value ' + (stateBal>0?'red':stateBal<0?'green':'');
+      if (stSub) stSub.textContent = stateBal>0 ? `will owe ${si.n} without adjustment` : `${si.n} on track`;
+    }
+  }
+
+  // ── BREAKDOWN ──
+  const deduction = STD[filing]||14600;
+  const taxWithout401k = fedTax(Math.max(0,totalIncome-deduction)*0+Math.max(0,totalIncome-(STD[filing]||14600)), filing);
+  const k401saved = Math.max(0, fedTax(Math.max(0,totalIncome-deduction+k401ded), filing) - fedLiab);
+
+  let bHTML = `<div class="breakdown-section"><div class="breakdown-section-label">How your federal liability is calculated</div>`;
+  // Add outside income rows if present
+  if(totalOutside>0) {
+    if(freelanceIncome>0) bHTML += `<div class="brow"><span class="brow-label">Freelance / side income</span><span class="brow-value">${fmt(freelanceIncome)}</span></div>`;
+    if(rentalIncome>0) bHTML += `<div class="brow"><span class="brow-label">Rental income (net)</span><span class="brow-value">${fmt(rentalIncome)}</span></div>`;
+    if(interestDiv>0) bHTML += `<div class="brow"><span class="brow-label">Interest & dividends</span><span class="brow-value">${fmt(interestDiv)}</span></div>`;
+    if(otherOutside>0) bHTML += `<div class="brow"><span class="brow-label">Other outside income</span><span class="brow-value">${fmt(otherOutside)}</span></div>`;
+    if(seTax>0) bHTML += `<div class="brow"><span class="brow-label">Self-employment tax (15.3%)</span><span class="brow-value red">${fmt(seTax)}</span></div>`;
+    if(seDeduction>0) bHTML += `<div class="brow"><span class="brow-label">SE tax deduction (½ SE tax)</span><span class="brow-value green">−${fmt(seDeduction)}</span></div>`;
+  }
+  const fedRows = [
+    ['Gross income', fmt(totalIncome), ''],
+    ...(k401ded>0?[['401(k) pre-tax contributions','−'+fmt(k401ded),'projected']]:[]),
+    ['Standard deduction', '−'+fmt(deduction), ''],
+    ['Taxable income', fmt(Math.max(0,taxableIncome-deduction)), ''],
+    ['Federal tax liability', fmt(fedLiab), ''],
+    ['Federal withheld YTD', '−'+fmt(fedWH), ''],
+    ['Projected future withholding (base)', '−'+fmt(pFedBase+pFedComm), 'projected'],
+    ...(pFed4c>0?[['Projected from W-4 extra (4c)','−'+fmt(pFed4c),'projected']]:[]),
+    ...(pFed4a>0?[['Projected from W-4 line 4a','−'+fmt(pFed4a),'projected']]:[]),
+    ...(totalEst>0?[['Estimated tax payments made','−'+fmt(totalEst),'']]: []),
+  ];
+  fedRows.forEach(([lbl,val,tag])=>{
+    const tagHtml = tag ? `<span class="badge ${tag}">${tag}</span>` : '';
+    bHTML += `<div class="brow"><span class="brow-label">${lbl}${tagHtml}</span><span class="brow-value ${tag==='owe'?'red':tag==='refund'?'green':''}">${val}</span></div>`;
+  });
+  const fedBalColor = fedBal>0?'red':fedBal<0?'green':'';
+  bHTML += `<div class="brow total"><span class="brow-label">Federal balance${fedBal!==0?'<span class="badge '+(fedBal>0?'owe':'refund')+'">'+(fedBal>0?'owe':'refund')+'</span>':''}</span><span class="brow-value ${fedBalColor}">${fmt(fedBal, true)}</span></div>`;
+  bHTML += `</div>`;
+
+  if (si.r>0||si.l>0) {
+    bHTML += `<div class="breakdown-section"><div class="breakdown-section-label">State — ${si.n}</div>`;
+    [['State + local tax liability', fmt(stateLiab), ''], // progressive brackets
+     ['State withheld YTD', '−'+fmt(stateWH), ''],
+     ['Projected future state withholding', '−'+fmt(pStateBase+pStateComm), 'projected']
+    ].forEach(([lbl,val,tag])=>{
+      const tagHtml = tag ? `<span class="badge ${tag}">${tag}</span>` : '';
+      bHTML += `<div class="brow"><span class="brow-label">${lbl}${tagHtml}</span><span class="brow-value muted">${val}</span></div>`;
+    });
+    const stBalColor = stateBal>0?'red':stateBal<0?'green':'';
+    bHTML += `<div class="brow total"><span class="brow-label">State balance${stateBal!==0?'<span class="badge '+(stateBal>0?'owe':'refund')+'">'+(stateBal>0?'owe':'refund')+'</span>':''}</span><span class="brow-value ${stBalColor}">${fmt(stateBal,true)}</span></div></div>`;
+  }
+  // Capital gains breakdown rows
+  if (netLTCG>0 || netSTCG>0 || capLoss>0) {
+    bHTML += `<div class="breakdown-section"><div class="breakdown-section-label">Capital Gains</div>`;
+    if(ltcg>0) bHTML += `<div class="brow"><span class="brow-label">Long-term gains (held 12+ mo.)</span><span class="brow-value">${fmt(ltcg)}</span></div>`;
+    if(stcg>0) bHTML += `<div class="brow"><span class="brow-label">Short-term gains (ordinary income)</span><span class="brow-value">${fmt(stcg)}</span></div>`;
+    if(capLoss>0) bHTML += `<div class="brow"><span class="brow-label">Capital losses (harvested)</span><span class="brow-value green">−${fmt(capLoss)}</span></div>`;
+    if(netLTCG>0) bHTML += `<div class="brow"><span class="brow-label">LTCG federal tax rate</span><span class="brow-value">${(ltcgTaxRate*100).toFixed(0)}%${niitApplies?' + 3.8% NIIT':''}</span></div>`;
+    if(netLTCG>0) bHTML += `<div class="brow"><span class="brow-label">LTCG federal tax</span><span class="brow-value">${fmt(ltcgTax + niitTax)}</span></div>`;
+    if(cgWithheld>0) bHTML += `<div class="brow"><span class="brow-label">CG taxes already withheld</span><span class="brow-value green">−${fmt(cgWithheld)}</span></div>`;
+    bHTML += `</div>`;
+  }
+  document.getElementById('breakdown-inner').innerHTML = bHTML;
+
+  // ── QUARTERLY TRACKER ──
+  const qEl = document.getElementById('quarterly-summary');
+  const anyQ = q1||q2||q3||q4||estYTD;
+  if (anyQ) {
+    const qPaid = [q1,q2,q3,q4];
+    const now = new Date();
+    const pastCount = DEADLINES.filter(d=>d.date<now).length;
+    const totalPaid = qSum>0?qSum:estYTD;
+    const qRemaining = Math.max(0, fedLiab - totalProjFed - totalPaid);
+    let cells = DEADLINES.map((d,i)=>{
+      const isPast=d.date<now, isNext=!isPast&&pastCount===i;
+      const cls=qPaid[i]>0?'paid':isNext?'next-up':isPast?'past-missed':'';
+      const nameCls=qPaid[i]>0?'paid':isNext?'next-up':'';
+      const status=qPaid[i]>0?'✓ Paid':isNext?'Up next':isPast?'Not recorded':'Upcoming';
+      const statusCls=qPaid[i]>0?'paid':isNext?'next-up':'';
+      return `<div class="q-cell ${cls}"><div class="q-name ${nameCls}">${d.q}</div><div class="q-amount">${qPaid[i]>0?fmt(qPaid[i]):'—'}</div><div class="q-date">${d.label}</div><div class="q-status ${statusCls}">${status}</div></div>`;
+    }).join('');
+    qEl.innerHTML = `<div class="quarters-card"><div style="font-size:14px;font-weight:600;margin-bottom:2px">Estimated Payment Tracker</div><div style="font-size:13px;color:var(--text-2)">Total paid: <strong>${fmt(totalPaid)}</strong> &nbsp;·&nbsp; Still owed: <strong style="color:${qRemaining>0?'var(--red)':'var(--green)'}">${fmt(qRemaining)}</strong></div><div class="quarters-grid">${cells}</div></div>`;
+  } else { qEl.innerHTML=''; }
+
+  // ── 401K ──
+  const kEl = document.getElementById('k401-summary');
+  if (k401ded>0||k401ytd>0) {
+    const pct = k401ded>0 ? Math.min(100,Math.round((k401ytd/k401ded)*100)) : 0;
+    const fillW = pct+'%';
+    const limit=23500, saved=Math.max(0,fedTax(Math.max(0,totalIncome+k401ded-(STD[filing]||14600)),filing)-fedLiab);
+    const savPer1k = k401ded>0?Math.round(saved/k401ded*1000):0;
+    const roth = k401type==='roth';
+    kEl.innerHTML = `<div class="k401-card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:2px">401(k) Tax Savings</div>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:0">${roth?'Roth contributions don\'t reduce current taxes.':'Your pre-tax contributions are reducing your taxable income.'}</div>
+      ${!roth?`<div class="k401-bar-wrap"><div class="k401-bar-track"><div class="k401-bar-fill" style="width:${fillW}"></div></div><div class="k401-bar-labels"><span>${fmt(k401ytd)} contributed</span><span>Target ${fmt(k401ded)}</span></div></div>`:''}
+      <div class="k401-stats">
+        <div class="k401-stat"><div class="k401-stat-val">${fmt(k401ded)}</div><div class="k401-stat-lbl">Annual target</div></div>
+        <div class="k401-stat"><div class="k401-stat-val" style="color:var(--text-2)">${pct}%</div><div class="k401-stat-lbl">Contributed YTD</div></div>
+        <div class="k401-stat"><div class="k401-stat-val green">${roth?'$0':fmt(saved)}</div><div class="k401-stat-lbl">Federal tax saved</div></div>
+      </div>
+      ${!roth && k401ded<limit ? `<div class="k401-insight">💡 You have <strong>${fmt(limit-k401ded)}</strong> of unused 401(k) room. Each additional $1,000 contributed saves you ~${fmt(savPer1k)} in federal taxes.</div>` : ''}
+    </div>`;
+  } else { kEl.innerHTML=''; }
+
+  // ── CAPITAL GAINS SUMMARY in stats row ──
+  // Update state stat card to show CG info if relevant
+  const cgEl = document.getElementById('r-cg');
+  if (cgEl) {
+    if (netLTCG>0||netSTCG>0) {
+      cgEl.innerHTML = `<div class="stat-label">Cap Gains Tax</div><div class="stat-value ${ltcgTax+niitTax>0?'red':''}">${fmt(ltcgTax+niitTax)}</div><div class="stat-sub">${netLTCG>0?fmt(netLTCG)+' LTCG @ '+(ltcgTaxRate*100).toFixed(0)+'%':''}${netSTCG>0?(netLTCG>0?' · ':'')+fmt(netSTCG)+' STCG':''}${niitApplies?' + NIIT':''}</div>`;
+    } else {
+      cgEl.innerHTML = `<div class="stat-label">Cap Gains Tax</div><div class="stat-value muted" style="font-size:16px;color:var(--text-3)">None entered</div><div class="stat-sub">add above if applicable</div>`;
+    }
+  }
+
+  // ── DEADLINES ──
+  const now=new Date();
+  let nextFound=false;
+  document.getElementById('dl-pills').innerHTML = DEADLINES.map(d=>{
+    const isPast=d.date<now;
+    let cls='dl-pill', txt=d.label+' — '+d.q;
+    if(isPast) cls+=' passed';
+    else if(!nextFound){cls+=' next';nextFound=true;txt='→ '+txt;}
+    return `<span class="${cls}">${txt}</span>`;
+  }).join('');
+
+  // ── RECOMMENDATION CARD ──
+  renderRecCard({
+    fedBal, stateBal, totalBal: fedBal + stateBal,
+    extraPerCheckBase, extraPerCommCheck, extraPerCheck,
+    actionAmt, remQ, remPP, remPP,
+    totalOutside, w4a4Recommendation, payFreq,
+    extra4c, other4a, bpp,
+    k401ded, k401ytd, k401type, k401traditional,
+    taxableIncome, totalIncome, filing,
+    netLTCG, netSTCG, capLoss, ordinaryIncomeDeduction,
+    seTax, seDeduction, si
+  });
+
+  // ── W-4 HOW-TO BANNER (still drives the provider mockups) ──
+  const banner = document.getElementById('w4-banner');
+  if (banner) {
+    if (extraPerCheckBase > 0 || extraPerCheck > 0) {
+      banner.style.display = 'flex';
+      const val = '$' + (extraPerCheckBase || extraPerCheck).toLocaleString('en-US');
+      ['wd-4c','adp-4c','rip-4c','seq-4c','paper-4c'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.textContent = val + ' / period';
+      });
+    }
+  }
+
+  renderActionPlan({
+    fedBal, stateBal, actionAmt, extraPerCheck, remQ, remPP,
+    netLTCG, netSTCG, ltcgTaxRate, niitApplies, niitTax, ltcgTax,
+    capLoss, cgWithheld, k401ded, k401ytd, k401type, k401traditional,
+    totalIncome, totalIncomeW2Only, taxableIncome, ordinaryIncomeDeduction,
+    totalLiab, filing, si, stcg, ltcg,
+    nextDeadline: getNextDeadline(), extra4c: extra4c, totalEst,
+    totalOutside, freelanceIncome, rentalIncome, interestDiv, otherOutside,
+    seTax, outsideWithheld,
+    extraPerCheckBase, extraPerCommCheck, coveredByBase, stillUncoveredAfterBase,
+    w4a4Recommendation, bpp, payFreq
+  });
+
+  const res = document.getElementById('results');
+  res.classList.add('show');
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+// ── Step 6: 401k type branch ──
+function on401kTypeChange() {
+  const type = document.getElementById('k401type').value;
+  document.getElementById('k401-mixed-row').style.display = type === 'mixed' ? 'block' : 'none';
+}
+
+function on401kSplitInput() {
+  const trad = parseNum(document.getElementById('k401traditional').value) || 0;
+  const roth = parseNum(document.getElementById('k401roth').value) || 0;
+  const total = g('k401total') || 0;
+  const sum = trad + roth;
+  const totalEl = document.getElementById('k401-split-total');
+  const noteEl = document.getElementById('k401-split-note');
+  if (totalEl) totalEl.textContent = '$' + sum.toLocaleString('en-US');
+  if (noteEl) {
+    if (total > 0 && Math.abs(sum - total) > 1) {
+      const diff = total - sum;
+      noteEl.textContent = diff > 0 ? `$${diff.toLocaleString('en-US')} unaccounted` : `$${Math.abs(diff).toLocaleString('en-US')} over total`;
+      noteEl.style.color = 'var(--red)';
+    } else if (total > 0 && sum > 0) {
+      noteEl.textContent = 'matches total ✓';
+      noteEl.style.color = '#16a34a';
+    } else {
+      noteEl.textContent = '';
+    }
+  }
+}
+
+// ── Step 1: Filing status branch ──
+let filingSelected = null;
+let spouseHasWithholding = false;
+
+function selectFiling(status) {
+  filingSelected = status;
+  document.getElementById('filing').value = status;
+
+  // Highlight tile
+  document.querySelectorAll('.filing-btn[data-filing]').forEach(b => {
+    b.classList.toggle('selected', b.dataset.filing === status);
+  });
+
+  // Always show the shared salary field
+  document.getElementById('step1-salary').style.display = 'block';
+
+  // MFJ: also show spouse panel; Single/HOH: hide it
+  document.getElementById('step1b').style.display = status === 'mfj' ? 'block' : 'none';
+
+  // Always show the Continue button area
+  document.getElementById('step1a-actions').style.display = 'block';
+}
+
+function step1GoBack() {
+  document.getElementById('step1b').style.display = 'none';
+  document.getElementById('step1a-actions').style.display = 'none';
+  document.getElementById('step1-salary').style.display = 'none';
+  // Reset tile selection
+  document.querySelectorAll('.filing-btn[data-filing]').forEach(b => b.classList.remove('selected'));
+  filingSelected = null;
+  document.getElementById('filing').value = '';
+}
+
+function step1SingleContinue() {
+  // No longer needed — base input is shared. Kept for safety.
+  wizNext();
+}
+
+function setSpouseWithheld(hasIt) {
+  spouseHasWithholding = hasIt;
+  document.getElementById('spouse-withheld-yes').classList.toggle('selected', hasIt);
+  document.getElementById('spouse-withheld-no').classList.toggle('selected', !hasIt);
+  document.getElementById('spouse-withheld-row').style.display = hasIt ? 'block' : 'none';
+  if (!hasIt) {
+    const el = document.getElementById('spouseWithheld');
+    if (el) el.value = '0';
+  }
+}
+
+// ── Step 4 branch logic ──
+let commFreqSelected = null;
+
+function selectCommFreq(freq) {
+  commFreqSelected = freq;
+  // Highlight selected button
+  document.querySelectorAll('.comm-freq-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.freq === freq);
+  });
+
+  // Build question and rows based on frequency
+  const now = new Date();
+  const month = now.getMonth(); // 0-indexed
+  const remainingMonths = 11 - month; // months left including current
+
+  let q, hint, rows;
+
+  if (freq === 'monthly') {
+    const checksLeft = remainingMonths;
+    q = `You have about ${checksLeft} more commission check${checksLeft !== 1 ? 's' : ''} coming this year.`;
+    hint = 'Enter your expected amount for each upcoming month, or use the same amount if it\'s roughly consistent.';
+    rows = buildMonthlyRows(month);
+  } else if (freq === 'quarterly') {
+    const quarters = getUpcomingQuarters(month);
+    q = `You have ${quarters.length} more quarterly commission check${quarters.length !== 1 ? 's' : ''} coming.`;
+    hint = 'Enter your expected payout for each remaining quarter.';
+    rows = buildLabeledRows(quarters);
+  } else if (freq === 'semiannual') {
+    const halves = getUpcomingHalves(month);
+    q = `Enter your expected semi-annual commission${halves.length > 1 ? 's' : ''}.`;
+    hint = 'Typical semi-annual cycles are Jan/Jul or Mar/Sep — adjust if yours differs.';
+    rows = buildLabeledRows(halves);
+  } else if (freq === 'annual') {
+    q = 'What\'s your expected annual commission payment?';
+    hint = 'If it\'s already happened this year, enter $0 — you captured it in the YTD step.';
+    rows = buildLabeledRows([{ label: 'Annual payout' }]);
+  } else {
+    // Irregular / deal-by-deal
+    q = 'How much total commission do you expect before Dec 31?';
+    hint = 'Best estimate is fine — you can always recalculate when a new deal closes.';
+    rows = buildTotalOnlyRow();
+  }
+
+  document.getElementById('step4b-q').textContent = q;
+  document.getElementById('step4b-hint').textContent = hint;
+  document.getElementById('step4b-rows').innerHTML = rows;
+
+  // Wire up live total computation
+  wireBreakoutInputs();
+
+  // Transition to 4B
+  document.getElementById('step4a').style.display = 'none';
+  document.getElementById('step4b').style.display = 'block';
+}
+
+function step4GoBack() {
+  document.getElementById('step4b').style.display = 'none';
+  document.getElementById('step4a').style.display = 'block';
+}
+
+function getMonthName(m) {
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];
+}
+
+function buildMonthlyRows(currentMonth) {
+  let html = '';
+  for (let m = currentMonth; m <= 11; m++) {
+    html += `<div class="comm-breakout-row">
+      <span class="comm-breakout-label">${getMonthName(m)}</span>
+      <div class="wiz-input-wrap" style="margin-top:0;flex:1"><span class="wiz-prefix">$</span>
+        <input class="wiz-input wiz-input-sm comm-breakout-input" type="text" placeholder="0" inputmode="numeric" data-month="${m}">
+      </div>
+    </div>`;
+  }
+  html += buildTotalDisplay();
+  return html;
+}
+
+function buildLabeledRows(items) {
+  let html = '';
+  let hasNextYearNote = false;
+  items.forEach((item, i) => {
+    if (item.paysNextYear) {
+      hasNextYearNote = true;
+      html += `<div class="comm-breakout-row comm-breakout-row-dim">
+        <span class="comm-breakout-label" style="color:var(--text-2)">${item.label}</span>
+        <div style="flex:1">
+          <div class="comm-next-year-note">💡 Typically paid in January — counts toward next year's taxes, not this year's. Leave at $0 unless your company pays Q4 before Dec 31.</div>
+          <div class="wiz-input-wrap" style="margin-top:6px"><span class="wiz-prefix">$</span>
+            <input class="wiz-input wiz-input-sm comm-breakout-input" type="text" placeholder="0" inputmode="numeric" data-idx="${i}" style="background:#f7f7f5">
+          </div>
+        </div>
+      </div>`;
+    } else {
+      html += `<div class="comm-breakout-row">
+        <span class="comm-breakout-label">${item.label}</span>
+        <div class="wiz-input-wrap" style="margin-top:0;flex:1"><span class="wiz-prefix">$</span>
+          <input class="wiz-input wiz-input-sm comm-breakout-input" type="text" placeholder="0" inputmode="numeric" data-idx="${i}">
+        </div>
+      </div>`;
+    }
+  });
+  if (items.length > 1) html += buildTotalDisplay();
+  return html;
+}
+
+function buildTotalOnlyRow() {
+  return `<div class="wiz-input-wrap"><span class="wiz-prefix">$</span>
+    <input class="wiz-input comm-breakout-input" type="text" placeholder="0" inputmode="numeric" data-idx="0">
+  </div>`;
+}
+
+function buildTotalDisplay() {
+  return `<div class="comm-breakout-total">
+    <span>Total remaining commissions</span>
+    <strong id="comm-breakout-sum">$0</strong>
+  </div>`;
+}
+
+function getUpcomingQuarters(currentMonth) {
+  const qDefs = [
+    { label: 'Q1 (Jan–Mar)', months: [0,1,2], payMonth: 3  },   // typically paid in April
+    { label: 'Q2 (Apr–Jun)', months: [3,4,5], payMonth: 6  },   // typically paid in July
+    { label: 'Q3 (Jul–Sep)', months: [6,7,8], payMonth: 9  },   // typically paid in October
+    { label: 'Q4 (Oct–Dec)', months: [9,10,11], payMonth: 12 }, // typically paid in January — NEXT year
+  ];
+  // Only include quarters where:
+  // (a) the quarter hasn't ended yet (so there's something to earn), AND
+  // (b) the payout will actually land before Dec 31 (i.e. not Q4, which pays in Jan)
+  // We flag Q4 separately so we can show a note rather than silently exclude it
+  return qDefs
+    .filter(q => q.months[2] >= currentMonth) // quarter still has remaining months
+    .map(q => ({
+      ...q,
+      paysNextYear: q.payMonth >= 12  // Q4 check pays in January = next tax year
+    }));
+}
+
+function getUpcomingHalves(currentMonth) {
+  const halves = [
+    { label: 'H1 (Jan–Jun)', endMonth: 5 },
+    { label: 'H2 (Jul–Dec)', endMonth: 11 },
+  ];
+  return halves.filter(h => h.endMonth >= currentMonth);
+}
+
+function wireBreakoutInputs() {
+  document.querySelectorAll('.comm-breakout-input').forEach(inp => {
+    // Live comma formatting
+    inp.addEventListener('input', function() {
+      const raw = this.value.replace(/[^0-9.]/g, '');
+      const parts = raw.split('.');
+      const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      this.value = parts.length > 1 ? intPart + '.' + parts[1] : intPart;
+      updateCommTotal();
+    });
+  });
+  updateCommTotal();
+}
+
+function updateCommTotal() {
+  let total = 0;
+  document.querySelectorAll('.comm-breakout-input').forEach(inp => {
+    const v = parseFloat(inp.value.replace(/,/g, '')) || 0;
+    total += v;
+  });
+  total = Math.round(total);
+  document.getElementById('commRemaining').value = total;
+  const sumEl = document.getElementById('comm-breakout-sum');
+  if (sumEl) sumEl.textContent = '$' + total.toLocaleString('en-US');
+}
+
+function updateRecSlider(maxW4c, netGap, remPP, sliderId, w4cId, commTopupId, spillId, eftpsId) {
+  const val = parseInt(document.getElementById(sliderId).value) || 0;
+  const coveredByW4c = val * remPP;
+  const remaining = Math.max(0, Math.round(netGap - coveredByW4c));
+  const commTopup = remaining; // full remaining shown as commission check top-up
+
+  // Update 4c display
+  const w4cEl = document.getElementById(w4cId);
+  const w4cSubEl = document.getElementById(w4cId + '-sub');
+  if (w4cEl) w4cEl.textContent = '$' + val.toLocaleString('en-US');
+  if (w4cSubEl) w4cSubEl.textContent = '$' + val.toLocaleString('en-US') + '/check';
+
+  // Update spillover note
+  const spillEl = document.getElementById(spillId);
+  const commEl = document.getElementById(commTopupId);
+  if (spillEl && commEl) {
+    if (remaining > 0) {
+      spillEl.classList.remove('hidden');
+      commEl.textContent = '$' + commTopup.toLocaleString('en-US');
+    } else {
+      spillEl.classList.add('hidden');
+    }
+  }
+
+  // Update EFTPS display
+  const eftpsEl = document.getElementById(eftpsId);
+  if (eftpsEl) {
+    if (remaining <= 0) {
+      eftpsEl.textContent = '$0';
+      eftpsEl.style.color = 'var(--text-3)';
+    } else {
+      const remQ = Math.max(1, parseInt(eftpsEl.dataset.remq || '4'));
+      const eftpsAmt = Math.ceil((remaining / remQ) / 100) * 100;
+      eftpsEl.textContent = '$' + eftpsAmt.toLocaleString('en-US');
+      eftpsEl.style.color = '';
+    }
+  }
+
+  // Update action plan withholding item to stay in sync with slider
+  const apW4El = document.getElementById('ap-w4-amount');
+  const apW4Desc = document.getElementById('ap-w4-desc');
+  if (apW4El) apW4El.textContent = '$' + val.toLocaleString('en-US') + '/check';
+  if (apW4Desc) {
+    const remQ2 = Math.max(1, parseInt((eftpsEl && eftpsEl.dataset.remq) || '4'));
+    const eftpsQ = remaining > 0 ? Math.ceil((remaining / remQ2) / 100) * 100 : 0;
+    if (val <= 0) {
+      apW4Desc.innerHTML = `No W-4 change — pay <strong>$${eftpsQ.toLocaleString('en-US')}</strong> per quarter directly to the IRS (eftps.gov) to cover your full gap.`;
+    } else if (remaining > 0) {
+      apW4Desc.innerHTML = `Set W-4 line 4c to <strong>$${val.toLocaleString('en-US')}/check</strong> and top up <strong>$${commTopup.toLocaleString('en-US')}</strong> on your next commission check.`;
+    } else {
+      apW4Desc.innerHTML = `Set W-4 line 4c to <strong>$${val.toLocaleString('en-US')}/check</strong> — this closes your full gap across your remaining pay periods. No other action needed.`;
+    }
+  }
+}
+
+function toggleBreakdown(btn) {
+  btn.classList.toggle('open');
+  document.getElementById('breakdown-body').classList.toggle('open');
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.ptab').forEach((t,i)=>{
+    const ids=['workday','adp','gusto','rippling','paylocity','sequoia','other'];
+    t.classList.toggle('active',ids[i]===id);
+  });
+  document.querySelectorAll('.provider-content').forEach(c=>{
+    c.classList.toggle('active',c.id==='tab-'+id);
+  });
+}
+
+function renderRecCard(d) {
+  const el = document.getElementById('rec-card');
+  if (!el) return;
+
+  const totalBal = d.fedBal + d.stateBal;
+  const isMFJ = d.filing === 'mfj';
+  const isCovered = totalBal <= 0;
+  const hasCap = d.netLTCG > 0 || d.netSTCG > 0;
+  const hasOutside = d.totalOutside > 0;
+
+  // ── OPTION A: W-4 line 4c (extra per paycheck) ──
+  // Target: NET total gap (federal + state combined).
+  // If state is a refund, it offsets the federal owed — 4c only needs to cover the net.
+  // W-4 4c only increases federal withholding, so if state is also owed, we add that too.
+  // But if state is a refund, we subtract it from the target (it will offset at filing).
+  const netGapForW4 = Math.round(Math.max(0, totalBal)); // totalBal = fedBal + stateBal, rounded to whole $
+  const fullGapPerCheck = netGapForW4 > 0 && d.remPP > 0
+    ? Math.ceil(netGapForW4 / d.remPP / 5) * 5   // round to nearest $5
+    : 0;
+  const alreadyHave4c = d.extra4c || 0;
+  const net4c = Math.max(0, fullGapPerCheck - alreadyHave4c);
+  const set4cTo = alreadyHave4c > 0
+    ? Math.max(0, alreadyHave4c + net4c)
+    : fullGapPerCheck;
+
+  // ── OPTION B: W-4 line 4a (declare other income) ──
+  // 4a is ONLY for declaring actual outside income you already have.
+  // It is NOT a lever to close a commission gap — don't recommend inflated numbers.
+  // Only show this option if the user has real outside income to declare.
+  const approxMarginalRate = 0.22; // conservative estimate for withholding projection
+  const set4aTo = d.totalOutside > 0 ? d.totalOutside : 0;
+  const extraFromOutside4a = d.totalOutside > 0
+    ? Math.round((d.totalOutside / d.payFreq) * approxMarginalRate * d.remPP)
+    : 0;
+  const show4aOption = d.totalOutside > 0;
+
+  // ── OPTION C: EFTPS quarterly ──
+  const eftpsAmt = d.actionAmt;
+
+  // ── DEDUCTIONS: what they're leaving on the table ──
+  const deductions = [];
+
+  // 401k room
+  if (d.k401type !== 'roth' && d.k401ded > 0) {
+    const room = Math.max(0, 23500 - d.k401ded);
+    const saving = Math.round(room * 0.28); // conservative marginal rate
+    if (room > 0) {
+      deductions.push({
+        name: '401(k) room remaining',
+        desc: `$${room.toLocaleString('en-US')} more before the $23.5k limit`,
+        val: fmt(saving),
+        active: true,
+        detail: `~${fmt(saving)} in tax savings available`
+      });
+    } else {
+      deductions.push({
+        name: '401(k) maxed out',
+        desc: 'Full $23,500 limit reached',
+        val: '✓',
+        active: true,
+        detail: 'Nothing left to optimize here'
+      });
+    }
+  } else if (!d.k401ded || d.k401ded === 0) {
+    deductions.push({
+      name: '401(k) — not entered',
+      desc: 'Could reduce taxable income by up to $23.5k',
+      val: `~${fmt(Math.round(23500 * 0.28))}`,
+      active: false,
+      detail: 'Add in step 6 to factor in'
+    });
+  }
+
+  // SE deduction
+  if (d.seTax > 0) {
+    deductions.push({
+      name: 'SE tax deduction',
+      desc: 'Half of self-employment tax is deductible',
+      val: fmt(d.seDeduction || d.seTax / 2),
+      active: true,
+      detail: 'Already applied to your calculation'
+    });
+  }
+
+  // Capital loss carryforward / offset
+  if (d.capLoss > 0 && d.ordinaryIncomeDeduction > 0) {
+    deductions.push({
+      name: 'Capital loss offset',
+      desc: `Up to $3k offsets ordinary income`,
+      val: fmt(Math.min(3000, d.ordinaryIncomeDeduction) * 0.28),
+      active: true,
+      detail: `${fmt(Math.min(3000, d.ordinaryIncomeDeduction))} deducted this year`
+    });
+  }
+
+  // Tax-loss harvesting opportunity
+  if (hasCap && d.capLoss === 0) {
+    deductions.push({
+      name: 'Tax-loss harvesting',
+      desc: `Sell losers before Dec 31, ${TAX_YEAR} to offset gains`,
+      val: 'Varies',
+      active: false,
+      detail: 'Check your brokerage for unrealized losses'
+    });
+  }
+
+  // Over-withheld — opportunity cost (only show in deductions when NOT the main recommendation)
+  if (totalBal < -2000 && !isCovered) {
+    deductions.push({
+      name: 'Over-withholding',
+      desc: `${fmt(Math.abs(totalBal))} refund = interest-free IRS loan`,
+      val: 'Lower 4c',
+      active: false,
+      detail: 'Reduce W-4 extra to reclaim cash flow'
+    });
+  }
+
+  // ── BUILD HTML ──
+  let html = '';
+
+  // ── OVER-WITHHOLDING: calculate optimal 4c to break even ──
+  const overBy = Math.abs(Math.min(0, totalBal)); // how much over-withheld
+  // Current per-check contribution to surplus: spread overBy across remaining periods
+  const surplusPerCheck = d.remPP > 0 ? Math.round(overBy / d.remPP / 5) * 5 : 0;
+  // Optimal 4c = current 4c minus the surplus per check (floor at 0)
+  const optimal4c = Math.max(0, (d.extra4c || 0) - surplusPerCheck);
+
+  if (isCovered) {
+    const isOverWithheld = totalBal < -500;
+    if (isOverWithheld && d.extra4c > 0) {
+      // Show a specific lower 4c recommendation
+      html = `<div class="rec-header">
+        <div class="rec-header-title">You're over-withholding — lower your 4c</div>
+        <div class="rec-header-sub">Your projected refund is <strong>${fmt(Math.abs(totalBal))}</strong>. That's money sitting with the IRS earning nothing. Lower your W-4 line 4c and put it back in your paycheck.</div>
+      </div>
+      <div class="rec-options" style="grid-template-columns:1fr 1fr">
+        <div class="rec-option rec-best">
+          <div class="rec-opt-badge best">★ Set this</div>
+          <div class="rec-opt-label">W-4 Line 4c — Lower to</div>
+          <div class="rec-opt-number green">$${optimal4c.toLocaleString('en-US')}</div>
+          <div class="rec-opt-sub">You currently have <strong>$${(d.extra4c||0).toLocaleString('en-US')}/paycheck</strong>. Lowering to <strong>$${optimal4c.toLocaleString('en-US')}</strong> recovers ~${fmt(surplusPerCheck)}/paycheck in take-home while still covering your exact liability.
+            ${optimal4c === 0 ? ' Setting to $0 fully eliminates the overpayment.' : ''}</div>
+          <div class="rec-opt-action">→ <span>Update in your payroll portal below</span></div>
+        </div>
+        <div class="rec-option">
+          <div class="rec-opt-badge alt">Option B</div>
+          <div class="rec-opt-label">Keep it and take the refund</div>
+          <div class="rec-opt-number" style="font-size:20px;margin-top:4px">+${fmt(Math.abs(totalBal), true)}</div>
+          <div class="rec-opt-sub">Do nothing and collect <strong>${fmt(Math.abs(totalBal), true)}</strong> in April. Some people prefer the forced savings — just know you're giving the IRS a 0% loan.</div>
+          <div class="rec-opt-action">→ <span>No action needed</span></div>
+        </div>
+      </div>`;
+    } else if (isOverWithheld) {
+      // Over-withheld but no explicit 4c set (base withholding or EFTPS excess)
+      html = `<div class="rec-header">
+        <div class="rec-header-title">You're over-withheld — projected refund of ${fmt(Math.abs(totalBal))}</div>
+        <div class="rec-header-sub">Your withholding is covering more than your liability. You'll get <strong>${fmt(Math.abs(totalBal), true)}</strong> back in April — but that's your money sitting idle with the IRS. Consider reducing your estimated quarterly payments if you're making them.</div>
+      </div>`;
+    } else {
+      html = `<div class="rec-header">
+        <div class="rec-header-title">✓ Right on target</div>
+        <div class="rec-header-sub">Your projected withholding covers your full liability with only a small buffer. No changes needed — recalculate any time a large commission hits.</div>
+      </div>`;
+    }
+  } else {
+    // Slider: 0 = no W-4 change (full EFTPS), max = full 4c (no EFTPS needed)
+    // We store the slider value as the 4c amount; remainder goes to commission check
+    const sliderId = 'rec-4c-slider';
+    const spillId  = 'rec-spillover';
+    const w4cDisplayId = 'rec-4c-display';
+    const commTopupId  = 'rec-comm-topup';
+    const eftpsDisplayId = 'rec-eftps-display';
+
+    const stateNote = d.stateBal < -200
+      ? `<div style="font-size:11px;color:var(--text-2);margin-top:8px">Your state refund of ${fmt(Math.abs(d.stateBal), true)} is already factored into these numbers.</div>`
+      : '';
+
+    html = `<div class="rec-header">
+      <div class="rec-header-title">Close your ${fmt(totalBal)} gap — adjust the split</div>
+      <div class="rec-header-sub">Use the slider to split between paycheck withholding and a direct IRS payment. This adjusts <em>your</em> W-4 — the right lever since your commissions are the source of the gap.${stateNote}</div>
+    </div>
+    <div class="rec-options" style="grid-template-columns:1fr 1fr">
+
+      <div class="rec-option rec-best">
+        <div class="rec-opt-badge best">★ Recommended</div>
+        <div class="rec-opt-label">W-4 Line 4c — Extra per paycheck</div>
+        <div class="rec-opt-number green" id="${w4cDisplayId}">$${set4cTo.toLocaleString('en-US')}</div>
+        <div class="rec-opt-sub">
+          ${alreadyHave4c > 0 ? `You currently have $${alreadyHave4c.toLocaleString('en-US')} — update to the amount above.` : 'Set this in your W-4 line 4c today.'}
+          Spread across <strong>${d.remPP} pay periods</strong>.
+        </div>
+
+        <div class="rec-slider-wrap">
+          <div class="rec-slider-label">
+            <span>Reduce paycheck impact</span>
+            <strong id="${w4cDisplayId}-sub">$${set4cTo.toLocaleString('en-US')}/check</strong>
+          </div>
+          <input type="range" class="rec-slider" id="${sliderId}"
+            min="0" max="${set4cTo}" value="${set4cTo}" step="25"
+            oninput="updateRecSlider(${set4cTo}, ${netGapForW4}, ${d.remPP}, '${sliderId}', '${w4cDisplayId}', '${commTopupId}', '${spillId}', '${eftpsDisplayId}')">
+          <div class="rec-slider-endpoints"><span>$0/check</span><span>$${set4cTo.toLocaleString('en-US')}/check (full)</span></div>
+        </div>
+
+        <div class="rec-spillover hidden" id="${spillId}">
+          Lower 4c means you need to make up the difference another way — top up on your next commission check or pay the IRS directly.
+          <br><strong>Commission check top-up needed: <span id="${commTopupId}">$0</span></strong>
+        </div>
+        <div class="rec-opt-action">→ <span>Update in your payroll portal below</span></div>
+      </div>
+
+      <div class="rec-option">
+        <div class="rec-opt-badge alt">Option B</div>
+        <div class="rec-opt-label">Direct IRS payment (EFTPS)</div>
+        <div class="rec-opt-number" id="${eftpsDisplayId}" data-remq="${d.remQ}">$${eftpsAmt.toLocaleString('en-US')}</div>
+        <div class="rec-opt-sub">Pay directly to the IRS
+          ${d.remQ > 1 ? `each remaining quarter (${d.remQ} payments left)` : 'before the next deadline'}.
+          No W-4 changes needed. Updates live as you adjust the slider.
+        </div>
+        ${show4aOption ? `<div style="margin-top:12px;font-size:11.5px;color:var(--text-2);border-top:1px solid var(--border);padding-top:10px">
+          <strong style="color:var(--text-1)">Also:</strong> Declare your $${set4aTo.toLocaleString('en-US')} outside income on W-4 line 4a to auto-cover ~${fmt(extraFromOutside4a)} each year.
+        </div>` : ''}
+        <div class="rec-opt-action">→ <span>Instructions in the section below</span></div>
+      </div>
+
+    </div>`;
+  }
+
+  // Deductions section — always shown
+  if (deductions.length > 0) {
+    html += `<div class="rec-deductions">
+      <div class="rec-ded-title">Deductions & moves that change this number</div>
+      <div class="rec-ded-grid">`;
+    deductions.forEach(d => {
+      html += `<div class="rec-ded-item ${d.active ? 'active' : 'inactive'}">
+        <div>
+          <div class="rec-ded-name">${d.name}</div>
+          <div class="rec-ded-desc">${d.detail}</div>
+        </div>
+        <div class="rec-ded-val ${d.active ? '' : 'miss'}">${d.val}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+
+function renderActionPlan(d) {
+  const el = document.getElementById('action-plan');
+  const items = [];
+  const isMFJ = d.filing === 'mfj';
+
+  // ── GROUP A: WHAT YOU OWE ──
+  const hasOutside = d.totalOutside > 0;
+  const hasCG = d.netLTCG > 0 || d.netSTCG > 0;
+
+  // Federal balance
+  if (d.fedBal > 500) {
+    const qStr = d.remQ > 1 ? ` across ${d.remQ} remaining quarters (${fmt(d.actionAmt)} each)` : ' before the next deadline';
+    items.push({
+      group: 'owe',
+      priority: 'urgent', icon: '!',
+      title: 'Without action, you\'ll owe the IRS ' + fmt(d.fedBal, true) + ' at filing',
+      desc: `Your current withholding path leaves a <strong>${fmt(d.fedBal, true)}</strong> federal shortfall. The IRS charges ~8% annualized on unpaid amounts — so doing nothing costs more every day. Pay <strong>${fmt(d.actionAmt)}</strong>${qStr} via IRS Direct Pay (irs.gov/payments) or adjust your withholding (next section) to close it automatically.`,
+      amount: fmt(d.actionAmt), amtClass: 'red', tag: 'Pay by '+d.nextDeadline.label
+    });
+  } else if (d.fedBal > 0) {
+    items.push({
+      group: 'owe',
+      priority: 'important', icon: '!',
+      title: 'Left alone, you\'ll owe ' + fmt(d.fedBal, true) + ' in April',
+      desc: `Your withholding will fall short by <strong>${fmt(d.fedBal, true)}</strong>. One payment via IRS Direct Pay before Dec 31, ${TAX_YEAR} closes it entirely — no enrollment needed, takes 5 minutes.`,
+      amount: fmt(d.fedBal, true), amtClass: 'gold', tag: 'Soon'
+    });
+  } else {
+    items.push({
+      group: 'owe',
+      priority: 'optimize', icon: '✓',
+      title: 'No federal action needed right now',
+      desc: `Your projected withholding covers your full federal liability${d.fedBal < -500 ? ` — you\'re on track for a <strong>${fmt(Math.abs(d.fedBal))}</strong> refund` : ''}. Recalculate after your next commission payment — large checks can flip this quickly.`,
+      amount: d.fedBal < 0 ? fmt(Math.abs(d.fedBal)) : 'Covered',
+      amtClass: d.fedBal < 0 ? 'green' : 'muted',
+      tag: d.fedBal < 0 ? 'Refund' : 'On track'
+    });
+  }
+
+  // State
+  if (d.stateBal > 500) {
+    items.push({
+      group: 'owe',
+      priority: 'important', icon: '!',
+      title: `Without action, you'll owe ${d.si.n} ${fmt(d.stateBal, true)} at filing`,
+      desc: `Your state withholding will fall short by <strong>${fmt(d.stateBal, true)}</strong>. Search "<em>${d.si.n} estimated tax payment</em>" to find your state's direct pay portal. Deadlines usually match federal quarterly dates.`,
+      amount: fmt(d.stateBal, true), amtClass: 'red', tag: 'State'
+    });
+  }
+
+  // CG tax not covered
+  if (hasCG) {
+    const cgOwed = Math.max(0, d.ltcgTax + d.niitTax - d.cgWithheld);
+    if (cgOwed > 200) {
+      items.push({
+        group: 'owe',
+        priority: 'urgent', icon: '!',
+        title: 'Brokerages don\'t withhold this — it\'ll hit you at filing if you don\'t act',
+        desc: `Your gains generate <strong>${fmt(d.ltcgTax + d.niitTax)}</strong> in federal tax${d.niitApplies ? ' (including 3.8% NIIT)' : ''}. Brokerages don't auto-withhold on sales — add this to your quarterly IRS payment. It's already rolled into your gap above.`,
+        amount: fmt(cgOwed), amtClass: 'red', tag: 'Capital gains'
+      });
+    }
+  }
+
+  // Outside income tax not covered
+  if (hasOutside && d.seTax > 0) {
+    items.push({
+      group: 'owe',
+      priority: 'important', icon: '!',
+      title: 'Freelance income carries SE tax that no one withholds for you',
+      desc: `Your <strong>${fmt(d.freelanceIncome)}</strong> in freelance income carries a <strong>${fmt(d.seTax)}</strong> self-employment tax (15.3%) on top of ordinary income tax. Half of this (${fmt(d.seTax/2)}) is deductible — we've already applied that. This is included in your federal gap above.`,
+      amount: fmt(d.seTax), amtClass: 'red', tag: 'SE tax'
+    });
+  }
+
+  // ── GROUP B: SMART WITHHOLDING STRATEGY ──
+  if (d.fedBal > 500 || d.extraPerCheckBase > 0) {
+    const coversPct = d.bpp > 0 ? Math.round((d.extraPerCheckBase / d.bpp) * 100) : 0;
+
+    // Option 1: Split — modest base + flush on commission
+    if (d.extraPerCommCheck > 0 && d.extraPerCheckBase > 0) {
+      items.push({
+        group: 'withholding',
+        priority: 'important', icon: '↑',
+        title: `${isMFJ ? 'Recommended: Adjust your W-4 + commission withholding' : 'Recommended: Modest W-4 bump + commission withholding'}`,
+        desc: `<strong>Best of both worlds.</strong> Add <strong>$${d.extraPerCheckBase.toLocaleString('en-US')} extra per biweekly paycheck</strong> (W-4 line 4c) — that's only ~${coversPct}% of your base check so it won't hurt your take-home. Then on your next commission check, request <strong>${fmt(d.extraPerCommCheck)}</strong> in additional federal withholding by emailing payroll before the pay run. Together these cover your full ${fmt(d.fedBal, true)} gap without gutting your biweeklies.`,
+        amount: '$'+d.extraPerCheckBase.toLocaleString('en-US')+'/check\n+'+fmt(d.extraPerCommCheck)+' on commission',
+        amtClass: 'gold', tag: 'Recommended'
+      });
+    } else if (d.extraPerCheckBase > 0 && d.extraPerCommCheck === 0) {
+      // Gap is small enough base alone covers it
+      items.push({
+        group: 'withholding',
+        priority: 'important', icon: '↑',
+        title: 'Small W-4 increase covers your gap',
+        desc: `Add <strong>$${d.extraPerCheckBase.toLocaleString('en-US')} extra per paycheck</strong> on W-4 line 4c. That's only ~${coversPct}% of your base paycheck and covers the full ${fmt(d.fedBal, true)} federal gap automatically over the remaining ${d.remPP} pay periods. Update it in your payroll portal today.`,
+        amount: '$'+d.extraPerCheckBase.toLocaleString('en-US')+'/check', amtClass: 'gold', tag: 'Via W-4'
+      });
+    } else if (d.fedBal > 0) {
+      // Base alone can't make a dent — push to commission withholding only
+      items.push({
+        group: 'withholding',
+        priority: 'important', icon: '↑',
+        title: 'Apply extra withholding on your next commission check',
+        desc: `Your base salary is small relative to the gap — adding more to biweekly checks would noticeably reduce take-home. Instead, email your payroll team before your next commission run and request <strong>${fmt(d.fedBal, true)}</strong> in extra federal withholding on that check. Payroll can always honor flat $ requests outside the standard W-4 rate.`,
+        amount: fmt(d.fedBal, true)+' on comm.', amtClass: 'gold', tag: 'Commission check'
+      });
+    }
+
+    // Option 2: W-4 line 4a — declare outside income + show it explicitly
+    if (d.totalOutside > 0) {
+      items.push({
+        group: 'withholding',
+        priority: 'optimize', icon: '4a',
+        title: 'Use W-4 line 4a to auto-cover outside income',
+        desc: `W-4 line 4a lets you declare non-wage income so your payroll automatically withholds extra across every biweekly paycheck — set-it-and-forget-it. Enter <strong>${fmt(d.totalOutside)}</strong> (your total outside income) in the "Other income" field on your W-4. This triggers roughly <strong>${fmt(Math.round((d.totalOutside / d.payFreq) * 0.22 * d.remPP))}</strong> in additional withholding over your remaining pay periods at your approximate marginal rate. It won't fully close the gap, but it handles the outside income slice automatically each year without you touching it again.`,
+        amount: fmt(d.totalOutside)+' declared', amtClass: 'gold', tag: 'W-4 line 4a'
+      });
+    } else {
+      // No outside income — still suggest 4a for commissions as "other income" workaround
+      // No 4a suggestion when there's no actual outside income — inflated numbers confuse users
+    }
+
+    // Option 3: EFTPS only (quarterly) — always show as fallback
+    items.push({
+      group: 'withholding',
+      priority: 'info', icon: '$',
+      title: d.remQ > 0 ? `Or: pay ${fmt(d.actionAmt)}/quarter directly to the IRS` : 'Or: pay the balance directly to the IRS',
+      desc: `If you'd rather not touch your W-4, pay <strong>${fmt(d.actionAmt)}</strong>${d.remQ > 1 ? ' each remaining quarter' : ' by the next deadline'} directly to the IRS — no W-4 changes, just a bank transfer on your schedule. Instructions are below (search "EFTPS" or use IRS Direct Pay at irs.gov/payments).`,
+      amount: fmt(d.actionAmt)+(d.remQ>1?'/quarter':''), amtClass: 'muted', tag: 'Pay IRS directly'
+    });
+  }
+
+  // ── GROUP C: OPTIMIZATION ──
+  // 401k room
+  if (d.k401type !== 'roth' && d.k401ded > 0 && d.k401ded < 23500) {
+    const room = 23500 - d.k401ded;
+    const savings = Math.round(room * 0.35);
+    items.push({
+      group: 'optimize',
+      priority: 'optimize', icon: '↑',
+      title: 'Max out your 401(k) before year end',
+      desc: `You have <strong>${fmt(room)}</strong> of unused 401(k) room. Contributing the maximum reduces your taxable income by ${fmt(room)}, saving approximately <strong>~${fmt(savings)}</strong> in federal taxes. Call your HR portal and increase your contribution % — the more pay periods left, the easier it spreads.`,
+      amount: '~'+fmt(savings)+' saved', amtClass: 'green', tag: 'Maximize'
+    });
+  }
+
+  // Tax-loss harvesting
+  if (hasCG && d.capLoss === 0) {
+    items.push({
+      group: 'optimize',
+      priority: 'optimize', icon: '↓',
+      title: `Tax-loss harvest before Dec 31, ${TAX_YEAR}`,
+      desc: `You have taxable gains this year. Selling any positions currently at a loss offsets your gains dollar-for-dollar. Losses beyond your gains also reduce ordinary income by up to <strong>$3,000/year</strong>, and unused losses carry forward indefinitely. Check your brokerage for unrealized losses before year end.`,
+      amount: `Before Dec 31, ${TAX_YEAR}`, amtClass: 'muted', tag: 'Strategy'
+    });
+  }
+
+  // STCG holding period
+  if (d.stcg > 0) {
+    const rateDiff = 0.37 - d.ltcgTaxRate;
+    items.push({
+      group: 'optimize',
+      priority: 'optimize', icon: '↗',
+      title: 'Hold new positions 12+ months before selling',
+      desc: `Your short-term gains are taxed at up to 37% (ordinary income). Future positions held past the 12-month mark drop to ${(d.ltcgTaxRate*100).toFixed(0)}%${d.niitApplies?' + 3.8% NIIT':''}. On $100k of gains that's a ~<strong>$${Math.round(rateDiff*100000).toLocaleString('en-US')}</strong> difference. Nothing to do today — just a rule for future sales.`,
+      amount: 'Hold longer', amtClass: 'muted', tag: 'Future'
+    });
+  }
+
+  // Over-withheld
+  if (d.fedBal < -3000) {
+    items.push({
+      group: 'optimize',
+      priority: 'info', icon: '↩',
+      title: 'You\'re giving the IRS an interest-free loan',
+      desc: `You\'re projected for a <strong>${fmt(Math.abs(d.fedBal))}</strong> refund — money that\'s been sitting with the IRS all year earning 0%. That\'s not a win, it\'s a missed opportunity. Consider lowering W-4 line 4c or reducing your quarterly payments. Always confirm with a CPA before adjusting down significantly.`,
+      amount: fmt(Math.abs(d.fedBal))+' refund', amtClass: 'green', tag: 'Optional'
+    });
+  }
+
+  // ── RENDER ──
+  const groupTitles = {
+    owe: { label: 'Without action, here\'s what happens', color: '#fff7ed', textColor: '#92400e' },
+    withholding: { label: 'How to fix it — pick your approach', color: '#f0f9ff', textColor: '#075985' },
+    optimize: { label: 'While you\'re at it — maximize your return', color: '#f0fdf4', textColor: '#166534' },
+  };
+
+  let html = `<div class="action-plan-card">
+    <div class="ap-header">
+      <div class="ap-header-title">Here's what to do about it</div>
+      <div class="ap-header-sub">Everything below is preventable. In order of priority — start at the top.</div>
+    </div>
+    <div class="ap-body">`;
+
+  let lastGroup = null;
+  let itemNum = 0;
+  items.forEach(item => {
+    if (item.group !== lastGroup) {
+      const g = groupTitles[item.group] || {};
+      if (lastGroup !== null) html += `</div>`; // close prev group
+      html += `<div class="ap-group">
+        <div class="ap-group-label" style="background:${g.color||'#f7f7f5'};color:${g.textColor||'#666'}">${g.label||item.group}</div>`;
+      lastGroup = item.group;
+    }
+    itemNum++;
+    const amtLines = item.amount.split('\n');
+    const amtHtml = amtLines.map(l=>`<div class="ap-amount ${item.amtClass}">${l}</div>`).join('');
+    const isW4Item = item.group === 'withholding' && item.tag === 'Recommended';
+    html += `<div class="ap-item"${isW4Item ? ' id="ap-w4-item"' : ''}>
+      <div class="ap-priority ${item.priority}">${itemNum}</div>
+      <div>
+        <div class="ap-content-title">${item.title} <span class="ap-tag">${item.tag}</span></div>
+        <div class="ap-content-desc"${isW4Item ? ' id="ap-w4-desc"' : ''}>${item.desc}</div>
+      </div>
+      <div id="${isW4Item ? 'ap-w4-amount' : ''}">${amtHtml}</div>
+    </div>`;
+  });
+  if (lastGroup !== null) html += `</div>`;
+  html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+
+// ── WIZARD ──
+let wizCurrent = 1;
+const WIZ_TOTAL = 8;
+
+function wizInit() {
+  // Populate dynamic year labels
+  document.querySelectorAll('#wiz-tax-year-hint').forEach(el => el.textContent = TAX_YEAR);
+  document.querySelectorAll('#dl-title').forEach(el => el.textContent = TAX_YEAR + ' Estimated Payment Deadlines');
+  showStep(1);
+  // Live comma formatting for all wizard number inputs
+  document.querySelectorAll('.wiz-input').forEach(input => {
+    input.addEventListener('input', function() {
+      const raw = this.value.replace(/,/g, '');
+      // Don't reformat if user is still typing a decimal
+      if (raw === '' || raw === '-' || raw.endsWith('.') || /\.\d*$/.test(raw)) return;
+      if (isNaN(raw)) return;
+      const pos = this.selectionStart;
+      const oldLen = this.value.length;
+      const parts = raw.split('.');
+      const intPart = parseInt(parts[0] || '0', 10);
+      const formatted = isNaN(intPart) ? raw : (
+        parts.length > 1
+          ? intPart.toLocaleString('en-US') + '.' + parts[1]
+          : intPart.toLocaleString('en-US')
+      );
+      this.value = formatted;
+      const newLen = this.value.length;
+      const newPos = Math.max(0, Math.min(pos + (newLen - oldLen), newLen));
+      this.setSelectionRange(newPos, newPos);
+    });
+    // On blur: clean up trailing decimal or zero-pad cents
+    input.addEventListener('blur', function() {
+      const raw = this.value.replace(/,/g, '');
+      if (raw === '' || raw === '.' || isNaN(raw)) return;
+      const num = parseFloat(raw);
+      if (isNaN(num)) return;
+      const parts = raw.split('.');
+      const intFormatted = Math.floor(Math.abs(num)).toLocaleString('en-US');
+      this.value = parts.length > 1 && parts[1] !== ''
+        ? intFormatted + '.' + parts[1]
+        : intFormatted;
+    });
+  });
+
+}
+
+function showStep(n, direction) {
+  const steps = document.querySelectorAll('.wiz-step');
+  const current = document.querySelector('.wiz-step.active');
+
+  // Animate out current
+  if (current) {
+    current.classList.remove('active');
+    current.classList.add(direction === 'back' ? 'exit-right' : 'exit-left');
+    setTimeout(() => current.classList.remove('exit-left', 'exit-right'), 400);
+  }
+
+  // Animate in new step
+  const next = document.querySelector(`.wiz-step[data-step="${n}"]`);
+  if (!next) return;
+
+  // Reset position for direction
+  next.style.transform = direction === 'back' ? 'translateX(-60px)' : 'translateX(60px)';
+  next.style.opacity = '0';
+  next.style.position = 'absolute';
+
+  // Force reflow
+  next.offsetHeight;
+
+  next.classList.add('active');
+  next.style.transform = '';
+  next.style.opacity = '';
+  next.style.position = '';
+
+  // Update progress
+  const pct = (n / WIZ_TOTAL) * 100;
+  document.getElementById('wiz-progress-fill').style.width = pct + '%';
+  document.getElementById('wiz-step-label').textContent = `Step ${n} of ${WIZ_TOTAL}`;
+
+  // Focus first input in the new step
+  setTimeout(() => {
+    const inp = next.querySelector('input:not([type="hidden"]), select');
+    if (inp) inp.focus();
+  }, 350);
+
+  // Refresh select placeholder styling for all selects on this step
+  next.querySelectorAll('.wiz-select').forEach(sel => {
+    sel.classList.toggle('unselected', sel.value === '');
+  });
+
+  // Update summary chips
+  renderChips(n);
+
+  // Recalc track height
+  setTimeout(() => fitTrack(), 50);
+
+  // Reset step 1 panels when navigating back to it
+  if (n === 1) {
+    document.getElementById('step1a').style.display = 'block';
+    const hasFiling = !!filingSelected;
+    document.getElementById('step1-salary').style.display = hasFiling ? 'block' : 'none';
+    document.getElementById('step1b').style.display = filingSelected === 'mfj' ? 'block' : 'none';
+    document.getElementById('step1a-actions').style.display = hasFiling ? 'block' : 'none';
+  }
+  // MFJ: Update step 5 question to acknowledge spouse
+  if (n === 5) {
+    const q5 = document.getElementById('step5-q');
+    if (q5 && filingSelected === 'mfj') {
+      q5.textContent = 'How much federal tax has been withheld from your paychecks this year?';
+    } else if (q5) {
+      q5.textContent = 'How much tax has already been taken out of your paychecks this year?';
+    }
+  }
+  // Reset step 4 to panel A when navigating back to it
+  if (n === 4) {
+    document.getElementById('step4a').style.display = 'block';
+    document.getElementById('step4b').style.display = 'none';
+  }
+  wizCurrent = n;
+}
+
+function fitTrack() {
+  const track = document.getElementById('wiz-track');
+  const active = track.querySelector('.wiz-step.active');
+  if (active) {
+    track.style.minHeight = active.offsetHeight + 'px';
+  }
+}
+
+function wizNext() {
+  if (wizCurrent < WIZ_TOTAL) {
+    showStep(wizCurrent + 1, 'forward');
+  }
+}
+
+function wizBack() {
+  if (wizCurrent > 1) {
+    showStep(wizCurrent - 1, 'back');
+  }
+}
+
+function wizGoTo(n) {
+  const dir = n > wizCurrent ? 'forward' : 'back';
+  showStep(n, dir);
+}
+
+function fmtChip(val) {
+  const n = parseFloat(val);
+  if (!val || isNaN(n)) return null;
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + Math.round(n/1000) + 'k';
+  return '$' + n.toLocaleString('en-US');
+}
+
+function chipLabel(step) {
+  switch(step) {
+    case 1: {
+      const filingLabels = { single:'Single', mfj:'Married jointly', hoh:'Head of household' };
+      const fl = filingSelected ? filingLabels[filingSelected] || filingSelected : null;
+      const base = document.getElementById('base');
+      const baseSingle = document.getElementById('base-single');
+      const bv = fmtChip((base && base.value) || (baseSingle && baseSingle.value));
+      const spouseEl = document.getElementById('spouseIncome');
+      const spV = spouseEl && spouseEl.value ? fmtChip(spouseEl.value) : null;
+      const baseLbl = bv ? (filingSelected === 'mfj' ? bv + ' yours' : bv) : null;
+      const parts = [fl, baseLbl, spV ? '+ ' + spV + ' spouse' : null].filter(Boolean);
+      return parts.length ? { label: 'Filing', val: parts.join(' · ') } : null;
+    }
+    case 2: {
+      const freq = document.getElementById('payFreq');
+      const state = document.getElementById('state');
+      const freqText = freq && freq.selectedIndex > 0 ? freq.options[freq.selectedIndex].text.split(' ')[0] : '';
+      const stateText = state && state.selectedIndex > 0 ? state.options[state.selectedIndex].text.split(' ')[0] : '';
+      const parts = [stateText, freqText].filter(Boolean);
+      return parts.length ? { label: 'Pay', val: parts.join(' · ') } : null;
+    }
+    case 3: {
+      const v = fmtChip(document.getElementById('commYTD').value);
+      return v ? { label: 'Comm YTD', val: v } : { label: 'Comm YTD', val: '$0' };
+    }
+    case 4: {
+      const v = fmtChip(document.getElementById('commRemaining').value);
+      const freqLabels = { monthly:'Monthly', quarterly:'Quarterly', semiannual:'Semi-annual', annual:'Annual', irregular:'Irregular' };
+      const freqTag = commFreqSelected ? freqLabels[commFreqSelected] : '';
+      return { label: 'Remaining', val: (v || '$0') + (freqTag ? ' · ' + freqTag : '') };
+    }
+    case 5: {
+      const f = fmtChip(document.getElementById('fedWithheld').value);
+      const s = fmtChip(document.getElementById('stateWithheld').value);
+      if (!f && !s) return null;
+      return { label: 'Withheld', val: (f||'$0') + ' fed' + (s ? ' · '+ s + ' state' : '') };
+    }
+    case 6: {
+      const k = fmtChip(document.getElementById('k401total').value);
+      const c = fmtChip(document.getElementById('currentExtra4c').value);
+      if (!k && !c) return null;
+      const parts = [];
+      if (k) parts.push(k + ' 401k');
+      if (c) parts.push(c + '/check');
+      return { label: '401k/W-4', val: parts.join(' · ') };
+    }
+    case 7: {
+      const vals = ['freelanceIncome','rentalIncome','interestDiv','otherOutside']
+        .map(id => parseFloat(document.getElementById(id).value)||0)
+        .reduce((a,b)=>a+b,0);
+      return vals > 0 ? { label: 'Outside', val: fmtChip(String(vals)) } : null;
+    }
+    default: return null;
+  }
+}
+
+function renderChips(activeStep) {
+  let html = '';
+  for (let i = 1; i < activeStep; i++) {
+    const chip = chipLabel(i);
+    if (chip) {
+      html += `<div class="wiz-chip" onclick="wizGoTo(${i})">
+        <span class="wiz-chip-label">${chip.label}</span>
+        <span class="wiz-chip-val">${chip.val}</span>
+        <span class="wiz-chip-edit">edit</span>
+      </div>`;
+    }
+  }
+  // Insert summary above wizard track if chips exist
+  let summary = document.getElementById('wiz-summary');
+  if (!summary) {
+    summary = document.createElement('div');
+    summary.id = 'wiz-summary';
+    summary.className = 'wiz-summary';
+    document.getElementById('wiz-track').before(summary);
+  }
+  summary.innerHTML = html;
+}
+
+// Enter key advances wizard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const active = document.querySelector('.wiz-step.active');
+    if (!active) return;
+    const step = parseInt(active.dataset.step);
+    if (step === WIZ_TOTAL) {
+      calculate();
+    } else {
+      wizNext();
+    }
+  }
+});
+
+// Init on load
+wizInit();
+initSelects();
+initTooltips();
+
+</script>
+</body>
+</html>
