@@ -572,6 +572,20 @@ h1 {
 }
 
 .input-wrap { position: relative; }
+
+/* ── Itemized deduction comparison ── */
+.itemize-winner {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+.itemize-winner.saves { background: #d1fae5; color: #065f46; }
+.itemize-winner.loses { background: var(--pill-bg); color: var(--text-3); }
 .input-prefix {
   position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
   font-size: 14px; color: var(--text-3); pointer-events: none;
@@ -2124,6 +2138,89 @@ select {
             </div>
           </div>
         </div>
+        <!-- Itemized Deductions -->
+        <div class="wiz-divider"></div>
+        <div class="wiz-field-label" style="font-size:14px;font-weight:600;margin-bottom:4px">Do you have significant deductions beyond the standard?</div>
+        <div class="wiz-hint" style="margin-top:0;margin-bottom:16px">Most people take the standard deduction (<span id="std-ded-display">$15,750</span>). But if you have a mortgage, big state tax bills, or charitable giving, itemizing could save you more. We'll automatically pick whichever is higher.</div>
+
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <button class="filing-btn" id="ded-standard-btn" onclick="selectDeductionMethod('standard')" style="flex:1;padding:14px">
+            <span class="fb-icon">📋</span>
+            <span class="fb-label">Standard deduction</span>
+            <span class="fb-sub">No extra entry needed</span>
+          </button>
+          <button class="filing-btn" id="ded-itemize-btn" onclick="selectDeductionMethod('itemize')" style="flex:1;padding:14px">
+            <span class="fb-icon">🧾</span>
+            <span class="fb-label">I might itemize</span>
+            <span class="fb-sub">Mortgage, SALT, charity…</span>
+          </button>
+        </div>
+
+        <div id="itemized-fields" style="display:none">
+          <div class="wiz-field-row" style="margin-top:12px">
+            <div class="wiz-field">
+              <div class="wiz-field-label">Mortgage interest paid this year
+                <span class="tip" style="display:inline-flex">?<span class="tipbox">From your lender's annual statement (Form 1098). Only the interest portion — not principal. Deductible on up to $750k of mortgage debt.</span></span>
+              </div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="mortgageInterest" placeholder="0" min="0" inputmode="numeric">
+              </div>
+            </div>
+            <div class="wiz-field">
+              <div class="wiz-field-label">Property taxes paid
+                <span class="tip" style="display:inline-flex">?<span class="tipbox">Annual property taxes on your primary home and any other properties. Part of the $10,000 SALT cap.</span></span>
+              </div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="propertyTax" placeholder="0" min="0" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+          <div class="wiz-field-row">
+            <div class="wiz-field">
+              <div class="wiz-field-label">Charitable donations
+                <span class="tip" style="display:inline-flex">?<span class="tipbox">Cash and property donated to qualified 501(c)(3) organizations. Keep receipts for anything over $250. Stock donations can be especially tax-efficient.</span></span>
+              </div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="charitableDonations" placeholder="0" min="0" inputmode="numeric">
+              </div>
+            </div>
+            <div class="wiz-field">
+              <div class="wiz-field-label">Medical expenses (above 7.5% of income)
+                <span class="tip" style="display:inline-flex">?<span class="tipbox">Only the portion exceeding 7.5% of your AGI is deductible. Most people don't hit this threshold unless they had major unreimbursed medical bills.</span></span>
+              </div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="medicalExpenses" placeholder="0" min="0" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+          <div class="wiz-field-row">
+            <div class="wiz-field">
+              <div class="wiz-field-label">Other itemized deductions
+                <span class="tip" style="display:inline-flex">?<span class="tipbox">Casualty losses from federally declared disasters, gambling losses (up to winnings), and certain other deductions. Most people leave this at $0.</span></span>
+              </div>
+              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                <input class="wiz-input wiz-input-sm" type="text" id="otherItemized" placeholder="0" min="0" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+
+          <!-- Live comparison -->
+          <div id="itemized-comparison" class="wiz-insight-box" style="margin-top:12px">
+            <div class="wib-title" id="itemize-verdict">⚖️ Enter your numbers above to compare</div>
+            <div class="wib-body">
+              <div class="wib-row">
+                <span class="wib-label">Standard</span>
+                <span class="wib-val" id="itemize-std-val">$15,750</span>
+              </div>
+              <div class="wib-divider"></div>
+              <div class="wib-row">
+                <span class="wib-label">Itemized</span>
+                <span class="wib-val" id="itemize-total-val">$0 so far</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="wiz-actions">
           <button class="wiz-back" onclick="wizBack()">← Back</button>
           <button class="wiz-next" onclick="wizNext()">Continue <span class="wiz-enter">↵</span></button>
@@ -2723,16 +2820,18 @@ function stateEffectiveRate(income, state) {
   ];
 })();
 
-function fedTax(income, filing) {
-  const taxable = Math.max(0, income - (STD[filing]||14600));
+function fedTax(income, filing, deductionOverride) {
+  const ded = deductionOverride !== undefined ? deductionOverride : (STD[filing]||14600);
+  const taxable = Math.max(0, income - ded);
   let tax=0, rem=taxable;
   for (const [lim,rate] of (BRACKETS[filing]||BRACKETS.single)) {
     if(rem<=0) break; const c=Math.min(rem,lim); tax+=c*rate; rem-=c;
   }
   return tax;
 }
-function marginalRate(income, filing) {
-  const taxable = Math.max(0, income - (STD[filing]||14600));
+function marginalRate(income, filing, deductionOverride) {
+  const ded = deductionOverride !== undefined ? deductionOverride : (STD[filing]||14600);
+  const taxable = Math.max(0, income - ded);
   let rem = taxable;
   for (const [lim,rate] of (BRACKETS[filing]||BRACKETS.single)) {
     if(rem<=lim) return (rate*100).toFixed(0)+'%'; rem-=lim;
@@ -2880,7 +2979,7 @@ function calculate() {
   //    at the marginal rate that income level implies. For high earners this is the top
   //    state bracket, which is much higher than the effective rate on the full year.
   //    We use the marginal rate at projected total income as the best proxy.
-  const projTotalIncome = base+commYTD+commRem+totalOutside; // full-year projection
+  const projTotalIncome = base+commYTD+commRem+totalOutside+spouseIncome; // full-year projection
   const stEffRate = stateEffectiveRate(projTotalIncome, gv('state'));
 
   // Aggregate method rate: marginal state+local rate at projected income level
@@ -2901,7 +3000,7 @@ function calculate() {
 
   const pStateBase = bpp*stEffRate*remPP;        // base salary: effective rate
   const pStateComm = commRem*stAggRate;           // commissions: aggregate/marginal rate
-  const totalProjFed   = fedWH+pFedBase+pFedComm+pFed4c+pFed4a+outsideWithheld;
+  const totalProjFed   = fedWH+pFedBase+pFedComm+pFed4c+pFed4a+outsideWithheld+spouseWithheld;
   const totalProjState = stateWH+pStateBase+pStateComm;
 
   // 401k
@@ -2911,8 +3010,8 @@ function calculate() {
     : k401type === 'mixed' ? k401traditional
     : k401total; // traditional: full amount
   const k401rem = Math.max(0, k401ded-k401ytd);
-  const totalIncome = base+commYTD+commRem+totalOutside;
-  const totalIncomeW2Only = base+commYTD+commRem; // for W-4 context
+  const totalIncome = base+commYTD+commRem+totalOutside+spouseIncome;
+  const totalIncomeW2Only = base+commYTD+commRem; // for W-4 context (your income only)
 
   // Capital gains
   const netCapLoss = Math.min(capLoss, ltcg+stcg); // losses offset gains
@@ -2936,8 +3035,13 @@ function calculate() {
   }
 
   // Taxable income = wages + STCG (short-term is ordinary income)
-  const taxableIncome = Math.max(0, totalIncome + netSTCG - k401ded - seDeduction - ordinaryIncomeDeduction);
-  const fedLiabWages = fedTax(taxableIncome, filing);
+  // Use whichever deduction is higher: standard or itemized
+  const effectiveDed = getEffectiveDeduction(filing);
+  const deductionUsed = effectiveDed.amount;
+  const deductionMethodUsed = effectiveDed.method;
+  const grossForFed = totalIncome + netSTCG - k401ded - seDeduction - ordinaryIncomeDeduction;
+  const taxableIncome = Math.max(0, grossForFed - deductionUsed);
+  const fedLiabWages = fedTax(grossForFed, filing, deductionUsed);
 
   // LTCG tax on top (NIIT of 3.8% also applies above certain thresholds)
   const ltcgTaxRate = ltcgRate(totalIncome + netSTCG + netLTCG, filing);
@@ -2967,25 +3071,27 @@ function calculate() {
   const stateBal = stateLiab - totalProjState;
 
   // Recommended action
-  // EFTPS amount targets net gap (fed + state). If state is a refund it offsets federal owed.
+  // W-4 line 4c only increases FEDERAL withholding. Target the federal gap only for W-4 recs.
+  // State over-withholding on commissions (aggregate method) frequently produces a refund
+  // that offsets the overall balance at filing. We don't bake that into the W-4 number.
+  // EFTPS targets the net total (fed + state) since you can direct-pay either.
   const netGapTotal = Math.max(0, fedBal + stateBal);
+  const fedGapOnly = Math.max(0, fedBal);
   const actionAmt = netGapTotal>0 ? (remQ>0 ? Math.ceil((netGapTotal/remQ)/100)*100 : Math.ceil(netGapTotal/100)*100) : 0;
 
   // Smart withholding split: commission check vs base paycheck
-  // Quarterly commission checks: user can elect supplemental withholding on those specifically
-  // Biweekly base: avoid killing take-home — target no more than 25% increase in extra withholding
-  const maxBaseImpact = Math.round(bpp * 0.25 / 10) * 10; // max extra per base check, rounded to nearest $10
-  // Use netGapTotal (fed + state combined) as the target for all withholding recommendations
-  const extraPerCheckBase = netGapTotal>0 && remPP>0 ? Math.round(Math.min(maxBaseImpact, Math.ceil(netGapTotal/remPP/10)*10)) : 0;
+  // Use fedGapOnly for W-4 recommendations (4c only affects federal)
+  const maxBaseImpact = Math.round(bpp * 0.25 / 10) * 10;
+  const extraPerCheckBase = fedGapOnly>0 && remPP>0 ? Math.round(Math.min(maxBaseImpact, Math.ceil(fedGapOnly/remPP/10)*10)) : 0;
   const coveredByBase = extraPerCheckBase * remPP;
-  const stillUncoveredAfterBase = Math.max(0, netGapTotal - coveredByBase);
+  const stillUncoveredAfterBase = Math.max(0, fedGapOnly - coveredByBase);
   // Remaining gap should come from flat $ on next commission check withholding (or EFTPS)
   const extraPerCommCheck = stillUncoveredAfterBase > 0 ? Math.ceil(stillUncoveredAfterBase/100)*100 : 0;
   // Option C: pure W-4 4a route — declare outside income as "other income"
   const w4a4Recommendation = totalOutside > 0 ? totalOutside : 0;
   const w4a4CoveredAmount = (w4a4Recommendation / payFreq) * 0.22 * remPP;
   // Legacy simple
-  const extraPerCheck = netGapTotal>0 && remPP>0 ? Math.ceil(netGapTotal/remPP/10)*10 : 0;
+  const extraPerCheck = fedGapOnly>0 && remPP>0 ? Math.ceil(fedGapOnly/remPP/10)*10 : 0;
 
   // ── HERO ──
   const heroCard = document.getElementById('hero-card');
@@ -2997,7 +3103,7 @@ function calculate() {
 
   // Total balance = fed + state (both could be owed or refunded independently)
   const totalBal = fedBal + stateBal;
-  const hasStateTax = si.r > 0 || si.l > 0;
+  const hasStateTax = (si.brackets && si.brackets.length > 0) || si.flat > 0 || si.l > 0;
 
   function setBreakout(show) {
     heroBreakout.style.display = show ? 'flex' : 'none';
@@ -3072,7 +3178,7 @@ function calculate() {
   const incomeLabelEl = document.getElementById('stat-income-label');
   if (incomeLabelEl) incomeLabelEl.textContent = isMFJ ? 'Household income this year' : 'Your total income this year';
   document.getElementById('r-liability').textContent = fmt(totalLiab);
-  document.getElementById('r-rate-sub').textContent = `${marginalRate(taxableIncome,filing)} marginal · ${(effRate*100).toFixed(1)}% effective rate`;
+  document.getElementById('r-rate-sub').textContent = `${marginalRate(grossForFed,filing,deductionUsed)} marginal · ${(effRate*100).toFixed(1)}% effective rate`;
 
   // "Already paid" stat
   const paidEl = document.getElementById('r-withheld');
@@ -3126,7 +3232,7 @@ function calculate() {
   const stEl = document.getElementById('r-state');
   const stSub = document.getElementById('r-state-sub');
   if (stEl) {
-    if (si.r===0 && si.l===0) {
+    if (!((si.brackets && si.brackets.length > 0) || si.flat > 0 || si.l > 0)) {
       stEl.textContent = 'N/A'; stEl.className='stat-value';
       if (stSub) stSub.textContent = 'no state income tax';
     } else {
@@ -3137,9 +3243,14 @@ function calculate() {
   }
 
   // ── BREAKDOWN ──
-  const deduction = STD[filing]||14600;
-  const taxWithout401k = fedTax(Math.max(0,totalIncome-deduction)*0+Math.max(0,totalIncome-(STD[filing]||14600)), filing);
-  const k401saved = Math.max(0, fedTax(Math.max(0,totalIncome-deduction+k401ded), filing) - fedLiab);
+  const deduction = deductionUsed;
+  const taxWithout401k = fedTax(Math.max(0,totalIncome), filing, deductionUsed);
+  const k401saved = Math.max(0, fedTax(totalIncome + netSTCG - seDeduction - ordinaryIncomeDeduction, filing, deductionUsed) - fedLiabWages);
+
+  // Deduction label for breakdown
+  const dedLabel = deductionMethodUsed === 'itemized'
+    ? `Itemized deductions <span class="badge refund">saves ${fmt(deductionUsed - (STD[filing]||15750))}</span>`
+    : 'Standard deduction';
 
   let bHTML = `<div class="breakdown-section"><div class="breakdown-section-label">How your federal liability is calculated</div>`;
   // Add outside income rows if present
@@ -3154,13 +3265,14 @@ function calculate() {
   const fedRows = [
     ['Gross income', fmt(totalIncome), ''],
     ...(k401ded>0?[['401(k) pre-tax contributions','−'+fmt(k401ded),'projected']]:[]),
-    ['Standard deduction', '−'+fmt(deduction), ''],
-    ['Taxable income', fmt(Math.max(0,taxableIncome-deduction)), ''],
+    [dedLabel, '−'+fmt(deduction), ''],
+    ['Taxable income', fmt(taxableIncome), ''],
     ['Federal tax liability', fmt(fedLiab), ''],
     ['Federal withheld YTD', '−'+fmt(fedWH), ''],
-    ['Projected future withholding (base)', '−'+fmt(pFedBase+pFedComm), 'projected'],
-    ...(pFed4c>0?[['Projected from W-4 extra (4c)','−'+fmt(pFed4c),'projected']]:[]),
-    ...(pFed4a>0?[['Projected from W-4 line 4a','−'+fmt(pFed4a),'projected']]:[]),
+    ['Projected future base withholding', '−'+fmt(pFedBase), 'projected'],
+    ...(pFedComm>0?[['Projected commission withholding','−'+fmt(pFedComm),'projected']]:[]),
+    ...(spouseWithheld>0?[['Spouse withholding','−'+fmt(spouseWithheld),'']]: []),
+    ...(outsideWithheld>0?[['Tax paid on outside income','−'+fmt(outsideWithheld),'']]: []),
     ...(totalEst>0?[['Estimated tax payments made','−'+fmt(totalEst),'']]: []),
   ];
   fedRows.forEach(([lbl,val,tag])=>{
@@ -3171,7 +3283,7 @@ function calculate() {
   bHTML += `<div class="brow total"><span class="brow-label">Federal balance${fedBal!==0?'<span class="badge '+(fedBal>0?'owe':'refund')+'">'+(fedBal>0?'owe':'refund')+'</span>':''}</span><span class="brow-value ${fedBalColor}">${fmt(fedBal, true)}</span></div>`;
   bHTML += `</div>`;
 
-  if (si.r>0||si.l>0) {
+  if (hasStateTax) {
     bHTML += `<div class="breakdown-section"><div class="breakdown-section-label">State — ${si.n}</div>`;
     [['State + local tax liability', fmt(stateLiab), ''], // progressive brackets
      ['State withheld YTD', '−'+fmt(stateWH), ''],
@@ -3269,7 +3381,8 @@ function calculate() {
     k401ded, k401ytd, k401type, k401traditional,
     taxableIncome, totalIncome, filing,
     netLTCG, netSTCG, capLoss, ordinaryIncomeDeduction,
-    seTax, seDeduction, si
+    seTax, seDeduction, si,
+    deductionMethodUsed, deductionUsed
   });
 
   // ── W-4 HOW-TO BANNER (still drives the provider mockups) ──
@@ -3703,6 +3816,9 @@ function selectFiling(status) {
 
   // Always show the Continue button area
   document.getElementById('step1a-actions').style.display = 'block';
+
+  // Update standard deduction display for step 8
+  updateStdDedDisplay();
 }
 
 function step1GoBack() {
@@ -4014,6 +4130,33 @@ function renderRecCard(d) {
 
   // ── DEDUCTIONS: what they're leaving on the table ──
   const deductions = [];
+
+  // Itemized vs Standard comparison
+  if (d.deductionMethodUsed === 'itemized') {
+    const stdDed = STD[d.filing] || 15750;
+    const extra = d.deductionUsed - stdDed;
+    const taxSaved = Math.round(extra * 0.30);
+    deductions.push({
+      name: 'Itemized deductions',
+      desc: `Beats standard by $${extra.toLocaleString('en-US')}`,
+      val: fmt(taxSaved),
+      active: true,
+      detail: `${fmt(d.deductionUsed)} total — saving ~${fmt(taxSaved)} vs standard`
+    });
+  } else if (deductionMethod === 'itemize') {
+    // User tried itemizing but standard was better
+    const itemized = getItemizedTotal();
+    if (itemized.total > 0) {
+      const stdDed = STD[d.filing] || 15750;
+      deductions.push({
+        name: 'Standard deduction used',
+        desc: `Itemized ($${itemized.total.toLocaleString('en-US')}) didn't beat standard ($${stdDed.toLocaleString('en-US')})`,
+        val: fmt(stdDed),
+        active: true,
+        detail: 'Standard deduction wins — already applied'
+      });
+    }
+  }
 
   // 401k room
   if (d.k401type !== 'roth' && d.k401ded > 0) {
@@ -4445,6 +4588,111 @@ function renderActionPlan(d) {
 }
 
 
+// ── Itemized Deductions ──
+let deductionMethod = 'standard'; // 'standard' or 'itemize'
+
+function selectDeductionMethod(method) {
+  deductionMethod = method;
+  document.getElementById('ded-standard-btn').classList.toggle('selected', method === 'standard');
+  document.getElementById('ded-itemize-btn').classList.toggle('selected', method === 'itemize');
+  document.getElementById('itemized-fields').style.display = method === 'itemize' ? 'block' : 'none';
+
+  // Update std deduction display based on filing status
+  updateStdDedDisplay();
+  if (method === 'itemize') updateItemizedComparison();
+}
+
+function updateStdDedDisplay() {
+  const filing = filingSelected || 'single';
+  const std = STD[filing] || 15750;
+  const el = document.getElementById('std-ded-display');
+  if (el) el.textContent = '$' + std.toLocaleString('en-US');
+  const valEl = document.getElementById('itemize-std-val');
+  if (valEl) valEl.innerHTML = '<strong>$' + std.toLocaleString('en-US') + '</strong>';
+}
+
+function getItemizedTotal() {
+  const mortgage = g('mortgageInterest');
+  const propTax = g('propertyTax');
+  const charity = g('charitableDonations');
+  const medical = g('medicalExpenses');
+  const other = g('otherItemized');
+
+  // SALT cap: state income tax (from withholding) + property tax, capped at $10,000
+  // We use state withheld as proxy for state income tax paid
+  const stateWithheld = g('stateWithheld');
+  const saltTotal = stateWithheld + propTax;
+  const saltCapped = Math.min(saltTotal, 10000);
+
+  // Medical: only amount exceeding 7.5% of AGI
+  const base = g('base');
+  const commYTD = g('commYTD');
+  const commRem = g('commRemaining');
+  const totalOutside = g('freelanceIncome') + g('rentalIncome') + g('interestDiv') + g('otherOutside');
+  const agi = base + commYTD + commRem + totalOutside;
+  const medicalThreshold = agi * 0.075;
+  const medicalDeductible = Math.max(0, medical - medicalThreshold);
+
+  return {
+    mortgage,
+    saltCapped,
+    saltTotal,
+    charity,
+    medicalDeductible,
+    medical,
+    medicalThreshold,
+    other,
+    total: mortgage + saltCapped + charity + medicalDeductible + other
+  };
+}
+
+function updateItemizedComparison() {
+  const filing = filingSelected || 'single';
+  const std = STD[filing] || 15750;
+  const itemized = getItemizedTotal();
+
+  const totalEl = document.getElementById('itemize-total-val');
+  const verdictEl = document.getElementById('itemize-verdict');
+
+  let breakdown = '<strong>$' + itemized.total.toLocaleString('en-US') + '</strong>';
+  if (itemized.total > 0) {
+    const parts = [];
+    if (itemized.mortgage > 0) parts.push('$' + itemized.mortgage.toLocaleString('en-US') + ' mortgage');
+    if (itemized.saltCapped > 0) parts.push('$' + itemized.saltCapped.toLocaleString('en-US') + ' SALT' + (itemized.saltTotal > 10000 ? ' (capped)' : ''));
+    if (itemized.charity > 0) parts.push('$' + itemized.charity.toLocaleString('en-US') + ' charity');
+    if (itemized.medicalDeductible > 0) parts.push('$' + itemized.medicalDeductible.toLocaleString('en-US') + ' medical');
+    if (itemized.other > 0) parts.push('$' + itemized.other.toLocaleString('en-US') + ' other');
+    breakdown += ' <span style="font-size:11px;color:var(--text-3)">(' + parts.join(' + ') + ')</span>';
+  }
+  if (totalEl) totalEl.innerHTML = breakdown;
+
+  if (itemized.total > std) {
+    const savings = itemized.total - std;
+    const taxSavings = Math.round(savings * 0.30); // rough marginal rate
+    verdictEl.innerHTML = '✅ Itemize! You save ~<strong>$' + taxSavings.toLocaleString('en-US') + '</strong> more in taxes <span class="itemize-winner saves">ITEMIZE WINS by $' + savings.toLocaleString('en-US') + '</span>';
+  } else if (itemized.total > 0) {
+    const diff = std - itemized.total;
+    verdictEl.innerHTML = '📋 Standard deduction is better by $' + diff.toLocaleString('en-US') + ' <span class="itemize-winner loses">STANDARD WINS</span>';
+  } else {
+    verdictEl.textContent = '⚖️ Enter your numbers above to compare';
+  }
+}
+
+function getEffectiveDeduction(filing) {
+  const std = STD[filing] || 15750;
+  if (deductionMethod !== 'itemize') return { amount: std, method: 'standard' };
+  const itemized = getItemizedTotal();
+  if (itemized.total > std) return { amount: itemized.total, method: 'itemized', detail: itemized };
+  return { amount: std, method: 'standard' };
+}
+
+// Wire live comparison on itemized inputs
+document.addEventListener('input', function(e) {
+  if (['mortgageInterest','propertyTax','charitableDonations','medicalExpenses','otherItemized'].includes(e.target.id)) {
+    updateItemizedComparison();
+  }
+});
+
 // ── WIZARD ──
 let wizCurrent = 1;
 const WIZ_TOTAL = 9;
@@ -4653,7 +4901,13 @@ function chipLabel(step) {
       const vals = ['freelanceIncome','rentalIncome','interestDiv','otherOutside']
         .map(id => parseFloat(document.getElementById(id).value)||0)
         .reduce((a,b)=>a+b,0);
-      return vals > 0 ? { label: 'Outside', val: fmtChip(String(vals)) } : null;
+      const parts = [];
+      if (vals > 0) parts.push(fmtChip(String(vals)) + ' outside');
+      if (deductionMethod === 'itemize') {
+        const itemized = getItemizedTotal();
+        if (itemized.total > 0) parts.push(fmtChip(String(itemized.total)) + ' itemized');
+      }
+      return parts.length ? { label: 'Other', val: parts.join(' · ') } : null;
     }
     default: return null;
   }
