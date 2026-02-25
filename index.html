@@ -256,6 +256,155 @@ h1 {
   border-top: 1px solid var(--border);
 }
 
+/* ── Paystub filled badge ── */
+.paystub-filled-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  background: var(--green-bg); color: #16a34a;
+  border: 1px solid var(--green-border);
+  border-radius: 20px; padding: 2px 8px;
+  margin-left: 10px; vertical-align: middle;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  letter-spacing: 0; text-transform: none;
+}
+
+/* ── 401k split UI ── */
+.split-mode-btn {
+  font-size: 11px; font-weight: 600; padding: 5px 10px;
+  border-radius: 6px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--text-2);
+  cursor: pointer; font-family: 'Bricolage Grotesque', sans-serif;
+  transition: all 0.15s;
+}
+.split-mode-btn.active {
+  background: var(--text); color: #fff; border-color: var(--text);
+}
+.split-track-wrap { margin-bottom: 10px; }
+.split-track {
+  height: 10px; border-radius: 5px; background: var(--border);
+  display: flex; overflow: hidden; margin-bottom: 6px;
+}
+.split-fill-trad { background: #3b82f6; height: 100%; transition: width 0.2s; }
+.split-fill-roth { background: #f59e0b; height: 100%; transition: width 0.2s; flex: 1; }
+.split-labels {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 600;
+}
+.split-label-trad { color: #3b82f6; }
+.split-label-roth { color: #f59e0b; }
+.split-slider {
+  width: 100%; margin: 4px 0 12px;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px;
+  background: var(--border); outline: none; cursor: pointer;
+}
+.split-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--text); cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.split-quick-btns {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.split-quick {
+  font-size: 11px; font-weight: 600; padding: 5px 10px;
+  border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--text-2);
+  cursor: pointer; font-family: 'Bricolage Grotesque', sans-serif;
+  transition: all 0.15s;
+}
+.split-quick:hover { border-color: var(--text); color: var(--text); }
+.split-result-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 4px;
+}
+.split-result-chip {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.split-result-chip-roth {
+  background: #fffbeb; border-color: #fde68a;
+}
+.src-label {
+  font-size: 10px; font-weight: 700; color: #3b82f6;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.split-result-chip-roth .src-label { color: #d97706; }
+.src-amount {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); font-family: 'DM Mono', monospace;
+}
+.src-sub { font-size: 10px; color: var(--text-3); }
+
+/* ── Paystub upload step ── */
+.paystub-upload-area {
+  border: 2px dashed var(--border-dark);
+  border-radius: var(--radius);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: var(--bg);
+}
+.paystub-upload-area:hover, .paystub-upload-area.drag-over {
+  border-color: var(--gold);
+  background: var(--gold-bg);
+}
+.psu-icon { font-size: 36px; margin-bottom: 10px; }
+.psu-label { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.psu-sub { font-size: 12px; color: var(--text-3); }
+
+.paystub-status {
+  font-size: 13px; color: var(--text-2); padding: 10px 14px;
+  background: var(--bg); border-radius: var(--radius-sm); line-height: 1.5;
+}
+.paystub-status.loading { color: var(--gold); }
+.paystub-status.error { color: var(--red); background: var(--red-bg); }
+.paystub-status.success { color: #16a34a; background: var(--green-bg); }
+
+.extracted-header {
+  font-size: 13px; font-weight: 600; color: #16a34a;
+  background: var(--green-bg); border: 1px solid var(--green-border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.extracted-check { margin-right: 6px; }
+.extracted-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.extracted-field {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+}
+.extracted-field.full-width { grid-column: 1 / -1; }
+.ef-label {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+}
+.ef-value {
+  font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); font-family: 'DM Mono', monospace;
+}
+.ef-input-wrap {
+  display: flex; align-items: center; gap: 4px; margin-top: 4px;
+}
+.ef-prefix { font-size: 16px; font-weight: 600; color: var(--text-3); }
+.ef-input {
+  font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+  font-family: 'DM Mono', monospace; color: var(--text);
+  border: none; background: none; width: 100%; outline: none;
+  padding: 0;
+}
+.ef-source {
+  font-size: 10px; color: var(--text-3); margin-top: 3px;
+  font-family: 'DM Mono', monospace;
+}
+.ef-not-found {
+  font-size: 13px; color: var(--text-3); font-style: italic; padding: 4px 0;
+}
+
 /* ── Filing status picker (step 1) ── */
 .filing-grid {
   display: grid;
@@ -1407,7 +1556,7 @@ select {
     <div class="wiz-progress">
       <div class="wiz-progress-fill" id="wiz-progress-fill"></div>
     </div>
-    <div class="wiz-step-label" id="wiz-step-label">Step 1 of 8</div>
+    <div class="wiz-step-label" id="wiz-step-label">Step 1 of 9</div>
 
     <!-- STEP CONTAINER -->
     <div class="wiz-track" id="wiz-track">
@@ -1544,8 +1693,41 @@ select {
         </div>
       </div>
 
-      <!-- STEP 3: Commissions YTD -->
+      <!-- STEP 3: Paystub upload -->
       <div class="wiz-step" data-step="3">
+        <div class="wiz-q">Upload your most recent pay stub.</div>
+        <div class="wiz-hint">We'll read it and fill in the numbers automatically — commissions, withholding, 401(k), all of it. Takes about 10 seconds. You can review and edit anything after.</div>
+
+        <div class="paystub-upload-area" id="paystub-drop" onclick="document.getElementById('paystub-file').click()">
+          <input type="file" id="paystub-file" accept="image/*,.pdf" style="display:none" onchange="handlePaystubUpload(event)">
+          <div class="psu-icon">📄</div>
+          <div class="psu-label">Click to upload or drag &amp; drop</div>
+          <div class="psu-sub">PNG, JPG, or PDF · your data never leaves your browser</div>
+        </div>
+
+        <!-- Preview + status -->
+        <div id="paystub-preview" style="display:none; margin-top:16px">
+          <img id="paystub-img" style="max-width:100%; border-radius:10px; border:1px solid var(--border); display:block; margin-bottom:12px">
+          <div id="paystub-status" class="paystub-status"></div>
+        </div>
+
+        <!-- Extracted fields — shown after successful parse -->
+        <div id="paystub-extracted" style="display:none; margin-top:16px">
+          <div class="extracted-header">
+            <span class="extracted-check">✓</span> Filled from your pay stub — review and adjust anything that looks off
+          </div>
+          <div class="extracted-grid" id="extracted-grid"></div>
+        </div>
+
+        <div class="wiz-actions" style="margin-top:24px">
+          <button class="wiz-back" onclick="wizBack()">← Back</button>
+          <button class="wiz-next" id="paystub-skip" onclick="wizNext()">Skip — I'll enter manually <span class="wiz-enter">↵</span></button>
+          <button class="wiz-next" id="paystub-continue" style="display:none" onclick="applyPaystubAndContinue()">Looks good — continue <span class="wiz-enter">↵</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Commissions YTD -->
+      <div class="wiz-step" data-step="4">
         <div class="wiz-q">How much commission or bonus have you received so far this year?</div>
         <div class="wiz-hint">Add up every commission, bonus, or variable payout you've actually been paid since January 1st. This is the money that often gets under-withheld.</div>
         <div class="wiz-input-wrap"><span class="wiz-prefix">$</span>
@@ -1580,8 +1762,8 @@ select {
         </div>
       </div>
 
-      <!-- STEP 4: Remaining commissions — 2-part branch -->
-      <div class="wiz-step" data-step="4">
+      <!-- STEP 5: Remaining commissions — 2-part branch -->
+      <div class="wiz-step" data-step="5">
 
         <!-- 4A: How often do you get commission checks? -->
         <div id="step4a" class="step4-panel">
@@ -1676,8 +1858,8 @@ select {
         </div>
       </div>
 
-      <!-- STEP 5: Withholding YTD -->
-      <div class="wiz-step" data-step="5">
+      <!-- STEP 6: Withholding YTD -->
+      <div class="wiz-step" data-step="6">
         <div class="wiz-q" id="step5-q">How much tax has already been taken out of your paychecks this year?</div>
         <div class="wiz-hint">This is money your employer already sent to the IRS and your state on your behalf. Use the <strong>YTD column</strong> on your latest pay stub — not the current paycheck amount.</div>
         <div class="wiz-field-row">
@@ -1744,8 +1926,8 @@ select {
         </div>
       </div>
 
-      <!-- STEP 6: 401k + W-4 current setup -->
-      <div class="wiz-step" data-step="6">
+      <!-- STEP 7: 401k + W-4 current setup -->
+      <div class="wiz-step" data-step="7">
         <div class="wiz-q">Any 401(k) contributions or extra withholding already set up?</div>
         <div class="wiz-badge-opt">Optional — skip if you're not sure</div>
         <div class="wiz-field-row" style="margin-top:20px">
@@ -1758,7 +1940,7 @@ select {
           <div class="wiz-field">
             <div class="wiz-field-label">How much total will you contribute by end of year?</div>
             <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
-              <input class="wiz-input wiz-input-sm" type="text" id="k401total" placeholder="0" min="0" inputmode="numeric">
+              <input class="wiz-input wiz-input-sm" type="text" id="k401total" placeholder="0" min="0" inputmode="numeric" oninput="updateSplitUI()">
             </div>
             <div class="ps-note" style="border:none;background:none;padding:4px 0;margin-top:4px">2025 max: $23,500 ($31,000 if age 50+)</div>
           </div>
@@ -1774,30 +1956,79 @@ select {
         </div>
 
         <!-- Mixed split — shown only when "mixed" is selected -->
-        <div id="k401-mixed-row" style="display:none; margin-top:14px">
-          <div class="wiz-field-label" style="margin-bottom:8px">
-            Of your total contributions, how much is <strong>Traditional</strong>?
-            <span class="tip" style="display:inline-flex">?<span class="tipbox">Only your Traditional (pre-tax) contributions reduce your taxable income this year. Roth contributions don't. Split your total between the two so we get the deduction right.</span></span>
-          </div>
-          <div class="wiz-field-row">
-            <div class="wiz-field">
-              <div class="wiz-field-label">Traditional (pre-tax)</div>
-              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
-                <input class="wiz-input wiz-input-sm" type="text" id="k401traditional" placeholder="0" min="0" inputmode="numeric" oninput="on401kSplitInput()">
-              </div>
+        <div id="k401-mixed-row" style="display:none; margin-top:20px">
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+            <div class="wiz-field-label" style="margin:0">
+              Traditional / Roth split
+              <span class="tip" style="display:inline-flex">?<span class="tipbox">Only Traditional (pre-tax) contributions reduce your taxable income now. Roth contributions don't — they grow tax-free later. Set the split and we'll compute the dollar amounts automatically.</span></span>
             </div>
-            <div class="wiz-field">
-              <div class="wiz-field-label">Roth (after-tax)</div>
-              <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
-                <input class="wiz-input wiz-input-sm" type="text" id="k401roth" placeholder="0" min="0" inputmode="numeric" oninput="on401kSplitInput()">
-              </div>
-            </div>
-            <div class="wiz-field" style="flex:0.8">
-              <div class="wiz-field-label">Total</div>
-              <div id="k401-split-total" style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-top:6px;font-family:'DM Mono',monospace">$0</div>
-              <div id="k401-split-note" style="font-size:11px;color:var(--text-3);margin-top:4px;font-family:'DM Mono',monospace"></div>
+            <div style="display:flex; gap:6px">
+              <button class="split-mode-btn active" id="split-mode-pct" onclick="setSplitMode('pct')">% Split</button>
+              <button class="split-mode-btn" id="split-mode-dollar" onclick="setSplitMode('dollar')">$ Amounts</button>
             </div>
           </div>
+
+          <!-- Percentage mode -->
+          <div id="split-pct-mode">
+            <div class="split-track-wrap">
+              <div class="split-track">
+                <div class="split-fill-trad" id="split-fill-trad"></div>
+                <div class="split-fill-roth" id="split-fill-roth"></div>
+              </div>
+              <div class="split-labels">
+                <span class="split-label-trad" id="split-label-trad">50% Traditional</span>
+                <span class="split-label-roth" id="split-label-roth">50% Roth</span>
+              </div>
+            </div>
+            <input type="range" class="split-slider" id="split-pct-slider"
+              min="0" max="100" value="50" step="5"
+              oninput="onSplitSlider(this.value)">
+            <div class="split-quick-btns">
+              <button class="split-quick" onclick="setSplitPct(100)">100% Traditional</button>
+              <button class="split-quick" onclick="setSplitPct(75)">75 / 25</button>
+              <button class="split-quick" onclick="setSplitPct(50)">50 / 50</button>
+              <button class="split-quick" onclick="setSplitPct(25)">25 / 75</button>
+              <button class="split-quick" onclick="setSplitPct(0)">100% Roth</button>
+            </div>
+          </div>
+
+          <!-- Dollar mode -->
+          <div id="split-dollar-mode" style="display:none">
+            <div class="wiz-field-row">
+              <div class="wiz-field">
+                <div class="wiz-field-label">Traditional (pre-tax)</div>
+                <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                  <input class="wiz-input wiz-input-sm" type="text" id="k401traditional-manual" placeholder="0" min="0" inputmode="numeric" oninput="onDollarSplitInput('trad')">
+                </div>
+              </div>
+              <div class="wiz-field">
+                <div class="wiz-field-label">Roth (after-tax)</div>
+                <div class="wiz-input-wrap" style="margin-top:0"><span class="wiz-prefix">$</span>
+                  <input class="wiz-input wiz-input-sm" type="text" id="k401roth-manual" placeholder="0" min="0" inputmode="numeric" oninput="onDollarSplitInput('roth')">
+                </div>
+              </div>
+            </div>
+            <div id="k401-split-note" style="font-size:11px;color:var(--text-3);margin-top:6px;font-family:'DM Mono',monospace"></div>
+          </div>
+
+          <!-- Computed amounts summary -->
+          <div class="split-result-row" id="split-result-row" style="display:none">
+            <div class="split-result-chip">
+              <span class="src-label">Traditional deduction</span>
+              <span class="src-amount" id="split-trad-amount">$0</span>
+              <span class="src-sub">reduces your taxable income</span>
+            </div>
+            <div class="split-result-chip split-result-chip-roth">
+              <span class="src-label">Roth</span>
+              <span class="src-amount" id="split-roth-amount">$0</span>
+              <span class="src-sub">no tax break now</span>
+            </div>
+          </div>
+
+          <!-- Hidden canonical inputs used by calculator -->
+          <input type="hidden" id="k401traditional" value="0">
+          <input type="hidden" id="k401roth" value="0">
         </div>
         <details class="wiz-find-it">
           <summary class="wiz-find-label">📄 Where to find your 401(k) contributions<span class="wiz-find-label-chevron">▼</span></summary>
@@ -1844,8 +2075,8 @@ select {
         </div>
       </div>
 
-      <!-- STEP 7: Outside income -->
-      <div class="wiz-step" data-step="7">
+      <!-- STEP 8: Outside income -->
+      <div class="wiz-step" data-step="8">
         <div class="wiz-q">Do you earn money outside your regular job?</div>
         <div class="wiz-badge-opt">Optional — skip if none applies</div>
         <div class="wiz-hint" style="margin-top:8px">Side hustles, rental properties, freelance work — none of this gets taxes withheld automatically, so it often leads to surprise bills.</div>
@@ -1899,8 +2130,8 @@ select {
         </div>
       </div>
 
-      <!-- STEP 8: Capital gains + estimated payments -->
-      <div class="wiz-step" data-step="8">
+      <!-- STEP 9: Capital gains + estimated payments -->
+      <div class="wiz-step" data-step="9">
         <div class="wiz-q">Did you sell any stocks or investments this year?</div>
         <div class="wiz-badge-opt">Optional — skip if you didn't sell anything</div>
         <div class="wiz-hint" style="margin-top:8px">When you sell stocks for a profit, that's a capital gain — and brokerages usually don't withhold any tax on it. This is a common source of surprise bills.</div>
@@ -2591,6 +2822,7 @@ function initTooltips() {
 }
 
 function initSelects() {
+  initPaystubDrop();
   document.querySelectorAll('.wiz-select').forEach(sel => {
     function update() {
       sel.classList.toggle('unselected', sel.value === '');
@@ -3071,26 +3303,375 @@ function calculate() {
   setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
 
-// ── Step 6: 401k type branch ──
+// ── Step 3: Paystub upload + Claude Vision extraction ──
+let paystubExtracted = null; // holds last parsed result
+
+// Drag and drop wiring (called after DOM ready)
+function initPaystubDrop() {
+  const drop = document.getElementById('paystub-drop');
+  if (!drop) return;
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processPaystubFile(file);
+  });
+}
+
+async function handlePaystubUpload(event) {
+  const file = event.target.files[0];
+  if (file) processPaystubFile(file);
+}
+
+async function processPaystubFile(file) {
+  // Show preview
+  const preview = document.getElementById('paystub-preview');
+  const img = document.getElementById('paystub-img');
+  const status = document.getElementById('paystub-status');
+  const extracted = document.getElementById('paystub-extracted');
+  const skipBtn = document.getElementById('paystub-skip');
+  const contBtn = document.getElementById('paystub-continue');
+
+  preview.style.display = 'block';
+  extracted.style.display = 'none';
+  contBtn.style.display = 'none';
+  skipBtn.style.display = 'inline-flex';
+
+  // Show image preview (convert PDF first page to data URL if needed)
+  const isPDF = file.type === 'application/pdf';
+  let base64Data, mediaType;
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    base64Data = btoa(binary);
+    mediaType = isPDF ? 'application/pdf' : file.type;
+
+    // Show image preview for non-PDFs
+    if (!isPDF) {
+      img.src = `data:${file.type};base64,${base64Data}`;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+  } catch (e) {
+    status.className = 'paystub-status error';
+    status.textContent = 'Could not read file. Please try a JPG or PNG screenshot of your pay stub.';
+    return;
+  }
+
+  status.className = 'paystub-status loading';
+  status.textContent = '⏳ Reading your pay stub...';
+
+  const prompt = `You are reading a pay stub to extract tax-relevant numbers. Return ONLY a JSON object with these exact keys. Use null for any field you cannot find with confidence.
+
+{
+  "baseSalary": <annual base salary in dollars, or null>,
+  "commissionYTD": <total commissions/bonuses/variable pay earned YTD in dollars, or null>,
+  "federalWithheldYTD": <federal income tax withheld YTD in dollars — NOT social security or medicare, or null>,
+  "stateWithheldYTD": <state income tax withheld YTD in dollars — add city tax if shown separately, or null>,
+  "k401TraditionalYTD": <pre-tax / traditional 401k employee contributions YTD, NOT employer match, or null>,
+  "k401RothYTD": <Roth 401k employee contributions YTD, or null>,
+  "extra4c": <extra federal withholding per paycheck from W-4 line 4c if shown, or null>,
+  "notes": "<one sentence about anything ambiguous or worth flagging, or empty string>"
+}
+
+Rules:
+- baseSalary: annualize if pay stub shows per-paycheck base pay (multiply by pay frequency if shown, or note as null if unclear)
+- commissionYTD: sum all commission, bonus, incentive, supplemental pay lines from YTD column
+- federalWithheldYTD: ONLY "Federal Income Tax" — skip Social Security, Medicare, SDI, SUI, FMLA, PFL
+- stateWithheldYTD: sum state income tax + any city income tax (NYC, etc.) from YTD column — skip SDI/SUI/disability
+- 401k: only employee contributions, not employer match
+- Return ONLY the JSON object, no markdown, no explanation`;
+
+  try {
+    const contentPayload = isPDF
+      ? [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Data } },
+          { type: 'text', text: prompt }
+        ]
+      : [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } },
+          { type: 'text', text: prompt }
+        ];
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: contentPayload }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'API error');
+    }
+
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    paystubExtracted = parsed;
+    showExtractedFields(parsed);
+
+    status.className = 'paystub-status success';
+    status.textContent = '✓ Pay stub read successfully. Review the numbers below.';
+    if (parsed.notes) status.textContent += ' Note: ' + parsed.notes;
+
+    extracted.style.display = 'block';
+    contBtn.style.display = 'inline-flex';
+    skipBtn.textContent = 'Edit manually instead';
+
+  } catch (e) {
+    console.error('Paystub parse error:', e);
+    status.className = 'paystub-status error';
+    status.textContent = '⚠ Couldn\'t read the pay stub automatically. You can enter numbers manually in the next steps.';
+    paystubExtracted = null;
+  }
+}
+
+function fmt$(val) {
+  if (val === null || val === undefined) return null;
+  return '$' + Math.round(val).toLocaleString('en-US');
+}
+
+function showExtractedFields(d) {
+  const grid = document.getElementById('extracted-grid');
+
+  const fields = [
+    { label: 'Base Salary (annual)', key: 'baseSalary', id: 'ef-base', source: 'Earnings section' },
+    { label: 'Commissions / Bonuses YTD', key: 'commissionYTD', id: 'ef-comm', source: 'YTD earnings' },
+    { label: 'Federal Income Tax Withheld YTD', key: 'federalWithheldYTD', id: 'ef-fed', source: 'Taxes section YTD' },
+    { label: 'State + City Tax Withheld YTD', key: 'stateWithheldYTD', id: 'ef-state', source: 'Taxes section YTD' },
+    { label: '401(k) Traditional YTD', key: 'k401TraditionalYTD', id: 'ef-401t', source: 'Deductions section YTD' },
+    { label: '401(k) Roth YTD', key: 'k401RothYTD', id: 'ef-401r', source: 'Deductions section YTD' },
+  ];
+
+  grid.innerHTML = fields.map(f => {
+    const val = d[f.key];
+    const displayVal = val !== null && val !== undefined ? Math.round(val) : null;
+    return `
+      <div class="extracted-field" id="${f.id}">
+        <div class="ef-label">${f.label}</div>
+        ${displayVal !== null
+          ? `<div class="ef-input-wrap">
+              <span class="ef-prefix">$</span>
+              <input class="ef-input" type="text" data-key="${f.key}" value="${displayVal.toLocaleString('en-US')}"
+                oninput="onEfInput(this)">
+            </div>
+            <div class="ef-source">from ${f.source}</div>`
+          : `<div class="ef-not-found">Not found — enter in next step</div>`
+        }
+      </div>`;
+  }).join('');
+}
+
+function onEfInput(el) {
+  // Keep paystubExtracted in sync as user edits
+  const raw = parseFloat(el.value.replace(/,/g, '')) || 0;
+  if (paystubExtracted) paystubExtracted[el.dataset.key] = raw;
+  // Live comma format
+  const pos = el.selectionStart, oldLen = el.value.length;
+  const intVal = parseInt(el.value.replace(/,/g, ''), 10);
+  if (!isNaN(intVal)) {
+    el.value = intVal.toLocaleString('en-US');
+    const newLen = el.value.length;
+    el.setSelectionRange(Math.max(0, pos + newLen - oldLen), Math.max(0, pos + newLen - oldLen));
+  }
+}
+
+function applyPaystubAndContinue() {
+  if (!paystubExtracted) { wizNext(); return; }
+  const d = paystubExtracted;
+
+  function setField(id, val) {
+    if (val === null || val === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = Math.round(val).toLocaleString('en-US');
+  }
+
+  // Base salary (step 1 shared input)
+  setField('base', d.baseSalary);
+
+  // Commissions YTD (step 4)
+  setField('commYTD', d.commissionYTD);
+
+  // Withholding YTD (step 6)
+  setField('fedWithheld', d.federalWithheldYTD);
+  setField('stateWithheld', d.stateWithheldYTD);
+
+  // 401k (step 7) — set YTD and infer type
+  const tradYTD = d.k401TraditionalYTD || 0;
+  const rothYTD = d.k401RothYTD || 0;
+  const totalYTD = tradYTD + rothYTD;
+
+  if (totalYTD > 0) {
+    setField('k401ytd', totalYTD);
+    setField('k401total', totalYTD); // conservative default: project same as YTD
+
+    const typeEl = document.getElementById('k401type');
+    if (typeEl) {
+      if (tradYTD > 0 && rothYTD > 0) {
+        typeEl.value = 'mixed';
+        on401kTypeChange();
+        // Set the split via percentage mode
+        splitPct = Math.round((tradYTD / totalYTD) * 100);
+        const slider = document.getElementById('split-pct-slider');
+        if (slider) slider.value = splitPct;
+        updateSplitUI();
+      } else if (rothYTD > 0) {
+        typeEl.value = 'roth';
+      } else {
+        typeEl.value = 'traditional';
+      }
+      typeEl.classList.remove('unselected');
+    }
+  }
+
+  // Mark steps that are fully populated with a "filled" badge
+  markStepFilled(4, d.commissionYTD !== null);
+  markStepFilled(6, d.federalWithheldYTD !== null && d.stateWithheldYTD !== null);
+  markStepFilled(7, totalYTD > 0);
+
+  wizNext();
+}
+
+function markStepFilled(stepNum, filled) {
+  if (!filled) return;
+  const step = document.querySelector(`.wiz-step[data-step="${stepNum}"]`);
+  if (!step) return;
+  // Add a subtle badge to the step question
+  const q = step.querySelector('.wiz-q');
+  if (q && !q.querySelector('.paystub-filled-badge')) {
+    const badge = document.createElement('span');
+    badge.className = 'paystub-filled-badge';
+    badge.textContent = '✓ filled from pay stub';
+    q.appendChild(badge);
+  }
+}
+
+// ── Step 7: 401k type + split branch ──
+let splitMode = 'pct'; // 'pct' or 'dollar'
+let splitPct = 50;     // traditional percentage
+
 function on401kTypeChange() {
   const type = document.getElementById('k401type').value;
   document.getElementById('k401-mixed-row').style.display = type === 'mixed' ? 'block' : 'none';
+  if (type === 'mixed') updateSplitUI();
 }
 
-function on401kSplitInput() {
-  const trad = parseNum(document.getElementById('k401traditional').value) || 0;
-  const roth = parseNum(document.getElementById('k401roth').value) || 0;
-  const total = g('k401total') || 0;
-  const sum = trad + roth;
-  const totalEl = document.getElementById('k401-split-total');
+function setSplitMode(mode) {
+  splitMode = mode;
+  document.getElementById('split-mode-pct').classList.toggle('active', mode === 'pct');
+  document.getElementById('split-mode-dollar').classList.toggle('active', mode === 'dollar');
+  document.getElementById('split-pct-mode').style.display = mode === 'pct' ? 'block' : 'none';
+  document.getElementById('split-dollar-mode').style.display = mode === 'dollar' ? 'block' : 'none';
+  updateSplitUI();
+}
+
+function setSplitPct(pct) {
+  splitPct = pct;
+  document.getElementById('split-pct-slider').value = pct;
+  updateSplitUI();
+}
+
+function onSplitSlider(val) {
+  splitPct = parseInt(val);
+  updateSplitUI();
+}
+
+function onDollarSplitInput(which) {
+  const total = g('k401total');
+  const tradEl = document.getElementById('k401traditional-manual');
+  const rothEl = document.getElementById('k401roth-manual');
+  const trad = parseFloat((tradEl.value || '').replace(/,/g, '')) || 0;
+  const roth = parseFloat((rothEl.value || '').replace(/,/g, '')) || 0;
+
+  // If total is set and user typed one side, auto-fill the other
+  if (total > 0 && which === 'trad' && trad <= total) {
+    const autoRoth = total - trad;
+    rothEl.value = autoRoth.toLocaleString('en-US');
+  } else if (total > 0 && which === 'roth' && roth <= total) {
+    const autoTrad = total - roth;
+    tradEl.value = autoTrad.toLocaleString('en-US');
+  }
+
+  // Recompute pct for consistency
+  const newTrad = parseFloat((tradEl.value || '').replace(/,/g, '')) || 0;
+  const newTotal = newTrad + (parseFloat((rothEl.value || '').replace(/,/g, '')) || 0);
+  if (newTotal > 0) splitPct = Math.round((newTrad / newTotal) * 100);
+
+  updateSplitUI();
+}
+
+function updateSplitUI() {
+  const total = g('k401total');
+
+  // Update visual track
+  const tradFill = document.getElementById('split-fill-trad');
+  const rothFill = document.getElementById('split-fill-roth');
+  const tradLabel = document.getElementById('split-label-trad');
+  const rothLabel = document.getElementById('split-label-roth');
+  if (tradFill) tradFill.style.width = splitPct + '%';
+  if (rothFill) rothFill.style.width = (100 - splitPct) + '%';
+  if (tradLabel) tradLabel.textContent = splitPct + '% Traditional';
+  if (rothLabel) rothLabel.textContent = (100 - splitPct) + '% Roth';
+
+  // Compute dollar amounts
+  let tradAmt, rothAmt;
+  if (splitMode === 'pct') {
+    tradAmt = total > 0 ? Math.round(total * splitPct / 100) : 0;
+    rothAmt = total > 0 ? total - tradAmt : 0;
+    // Sync manual dollar fields
+    const tradManual = document.getElementById('k401traditional-manual');
+    const rothManual = document.getElementById('k401roth-manual');
+    if (tradManual) tradManual.value = tradAmt > 0 ? tradAmt.toLocaleString('en-US') : '';
+    if (rothManual) rothManual.value = rothAmt > 0 ? rothAmt.toLocaleString('en-US') : '';
+  } else {
+    tradAmt = parseFloat((document.getElementById('k401traditional-manual')?.value || '').replace(/,/g, '')) || 0;
+    rothAmt = parseFloat((document.getElementById('k401roth-manual')?.value || '').replace(/,/g, '')) || 0;
+    // Sync pct slider
+    const sumAmt = tradAmt + rothAmt;
+    if (sumAmt > 0) {
+      splitPct = Math.round((tradAmt / sumAmt) * 100);
+      const slider = document.getElementById('split-pct-slider');
+      if (slider) slider.value = splitPct;
+    }
+  }
+
+  // Write to hidden canonical inputs
+  const tradHidden = document.getElementById('k401traditional');
+  const rothHidden = document.getElementById('k401roth');
+  if (tradHidden) tradHidden.value = tradAmt;
+  if (rothHidden) rothHidden.value = rothAmt;
+
+  // Show/hide result chips
+  const resultRow = document.getElementById('split-result-row');
+  const tradAmtEl = document.getElementById('split-trad-amount');
+  const rothAmtEl = document.getElementById('split-roth-amount');
+  if (resultRow) {
+    const show = total > 0 && (tradAmt > 0 || rothAmt > 0);
+    resultRow.style.display = show ? 'grid' : 'none';
+    if (tradAmtEl) tradAmtEl.textContent = '$' + tradAmt.toLocaleString('en-US');
+    if (rothAmtEl) rothAmtEl.textContent = '$' + rothAmt.toLocaleString('en-US');
+  }
+
+  // Validation note for dollar mode
   const noteEl = document.getElementById('k401-split-note');
-  if (totalEl) totalEl.textContent = '$' + sum.toLocaleString('en-US');
-  if (noteEl) {
+  if (noteEl && splitMode === 'dollar') {
+    const sum = tradAmt + rothAmt;
     if (total > 0 && Math.abs(sum - total) > 1) {
       const diff = total - sum;
-      noteEl.textContent = diff > 0 ? `$${diff.toLocaleString('en-US')} unaccounted` : `$${Math.abs(diff).toLocaleString('en-US')} over total`;
+      noteEl.textContent = diff > 0 ? `$${diff.toLocaleString('en-US')} unaccounted — adjust to match your total` : `$${Math.abs(diff).toLocaleString('en-US')} over total`;
       noteEl.style.color = 'var(--red)';
-    } else if (total > 0 && sum > 0) {
+    } else if (sum > 0) {
       noteEl.textContent = 'matches total ✓';
       noteEl.style.color = '#16a34a';
     } else {
@@ -3098,6 +3679,8 @@ function on401kSplitInput() {
     }
   }
 }
+
+function on401kSplitInput() { updateSplitUI(); }
 
 // ── Step 1: Filing status branch ──
 let filingSelected = null;
@@ -3864,7 +4447,7 @@ function renderActionPlan(d) {
 
 // ── WIZARD ──
 let wizCurrent = 1;
-const WIZ_TOTAL = 8;
+const WIZ_TOTAL = 9;
 
 function wizInit() {
   // Populate dynamic year labels
@@ -3976,7 +4559,7 @@ function showStep(n, direction) {
     }
   }
   // Reset step 4 to panel A when navigating back to it
-  if (n === 4) {
+  if (n === 5) {
     document.getElementById('step4a').style.display = 'block';
     document.getElementById('step4b').style.display = 'none';
   }
@@ -4039,22 +4622,25 @@ function chipLabel(step) {
       return parts.length ? { label: 'Pay', val: parts.join(' · ') } : null;
     }
     case 3: {
+      return paystubExtracted ? { label: 'Pay stub', val: '✓ uploaded' } : null;
+    }
+    case 4: {
       const v = fmtChip(document.getElementById('commYTD').value);
       return v ? { label: 'Comm YTD', val: v } : { label: 'Comm YTD', val: '$0' };
     }
-    case 4: {
+    case 5: {
       const v = fmtChip(document.getElementById('commRemaining').value);
       const freqLabels = { monthly:'Monthly', quarterly:'Quarterly', semiannual:'Semi-annual', annual:'Annual', irregular:'Irregular' };
       const freqTag = commFreqSelected ? freqLabels[commFreqSelected] : '';
       return { label: 'Remaining', val: (v || '$0') + (freqTag ? ' · ' + freqTag : '') };
     }
-    case 5: {
+    case 6: {
       const f = fmtChip(document.getElementById('fedWithheld').value);
       const s = fmtChip(document.getElementById('stateWithheld').value);
       if (!f && !s) return null;
       return { label: 'Withheld', val: (f||'$0') + ' fed' + (s ? ' · '+ s + ' state' : '') };
     }
-    case 6: {
+    case 7: {
       const k = fmtChip(document.getElementById('k401total').value);
       const c = fmtChip(document.getElementById('currentExtra4c').value);
       if (!k && !c) return null;
@@ -4063,7 +4649,7 @@ function chipLabel(step) {
       if (c) parts.push(c + '/check');
       return { label: '401k/W-4', val: parts.join(' · ') };
     }
-    case 7: {
+    case 8: {
       const vals = ['freelanceIncome','rentalIncome','interestDiv','otherOutside']
         .map(id => parseFloat(document.getElementById(id).value)||0)
         .reduce((a,b)=>a+b,0);
